@@ -163,7 +163,7 @@
                   <template v-if="videoSupported">Wenn es dir lieber ist, kannst du die Videoaufzeichnung auch hier ausschalten. Mit Video ist es natürlich schöner. &#128525;
                     <v-switch v-model="useVideo" label="Video" class="ml-3"></v-switch>
                   </template>
-                  <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät probieren (Apple-Mobilgeräte haben z.B. derzeit leider nicht die nötige Funktionalität) bzw. einen anderen, modernen Browser (Firefox, Chrome, Edge) verwenden.</template>
+                  <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät probieren (Apple-Mobilgeräte haben z.B. derzeit leider nicht die nötige Funktionalität) bzw. einen anderen, modernen Browser (Firefox, Chrome) verwenden.</template>
                 </p>
               </template>
               <h2 class="subtitle-1 mt-2">Auf gehts</h2>
@@ -179,7 +179,7 @@
             <h1 class="title">Aufnahme</h1>
             <template v-if="mediaStream === null">
               <p v-if="!mediaError">Dein Browser fragt dich nun nach Aufnahmerechten. Es geht weiter, wenn du diesen zugestimmt hast. Wenn nichts passiert, dann lade bitte die Seite neu.</p>
-              <p v-else>Leider gab es ein Problem beim Vorbereiten der Aufnahme. Bitte lade die Seite noch einmal neu oder probiere es auf einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. mit einem anderen Browser (Firefox, Chrome, Edge).</p>
+              <p v-else>Leider gab es ein Problem beim Vorbereiten der Aufnahme. Bitte lade die Seite noch einmal neu oder probiere es auf einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. mit einem anderen Browser (Firefox, Chrome).</p>
             </template>
             <template v-else>
               <p>Ein paar Hinweise, damit die Aufnahme gut gelingt:</p>
@@ -244,7 +244,7 @@
               <v-spacer class="mt-4" />
               <template v-else v-if="!referenceAudioBuffer">
                 <v-alert type="error" class="my-2" v-if="loadReferenceError">
-                  Leider konnte die Referenz-Aufnahme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox, Chrome oder Edge.
+                  Leider konnte die Referenz-Aufnahme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
                 </v-alert>
                 <template v-else>
                   <p>Referenz-Aufnahme wird geladen... <v-progress-circular indeterminate size="30" /></p>
@@ -353,7 +353,7 @@
               </template>
             </template>
             <template v-if="!playbackSupported">
-              <p>Leider ist die Wiedergabe der Aufnahme auf deinem Endgerät nicht möglich. Du kannst deine Aufnahme aber trotzdem speichern. Alternativ kannst du es sonst auch nochmal mit einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. einem anderen Browser (Firefox, Chrome, Edge) probieren. Der auf Apple-Geräten verwendete Safari-Browser bietet beispielsweise leider nicht die nötige Funktionalität.</p>
+              <p>Leider ist die Wiedergabe der Aufnahme auf deinem Endgerät nicht möglich. Du kannst deine Aufnahme aber trotzdem speichern. Alternativ kannst du es sonst auch nochmal mit einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. einem anderen Browser (Firefox, Chrome) probieren. Der auf Apple-Geräten verwendete Safari-Browser bietet beispielsweise leider nicht die nötige Funktionalität.</p>
               <v-btn large color="primary" class="ma-4" @click="step = 4">
                 Zum Speichern
                 <v-icon small right dark>mdi-arrow-right</v-icon>
