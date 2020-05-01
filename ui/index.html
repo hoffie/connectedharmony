@@ -243,7 +243,12 @@
 
               <v-spacer class="mt-4" />
               <template v-else v-if="!referenceAudioBuffer">
-                <p>Referenz-Aufnahme wird geladen... <v-progress-circular indeterminate size="30" /></p>
+                <v-alert type="error" class="my-2" v-if="loadReferenceError">
+                  Leider konnte die Referenz-Aufnahme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox, Chrome oder Edge.
+                </v-alert>
+                <template v-else>
+                  <p>Referenz-Aufnahme wird geladen... <v-progress-circular indeterminate size="30" /></p>
+                </template>
               </template>
               <template v-else>
                 <v-btn large @click="toggleRecord" color="primary">

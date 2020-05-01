@@ -5,3 +5,4 @@
 - audio buffer tuning
 - mix by voice
 - loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
+- send client errors to server for debugging

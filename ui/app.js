@@ -24,6 +24,7 @@ const Project = {
       recordedVideoURL: '',
       referenceAudioBuffer: null,
       referenceSource: null,
+      loadReferenceError: false,
       recordedPlayer: null,
       delay: 0,
       startupDelay: 1, // time until metronome starts
@@ -304,10 +305,15 @@ const Project = {
         }.bind(this));
     },
     loadReference: async function() {
-      const response = await fetch(this.project.ReferenceURI);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-      this.referenceAudioBuffer = await audioBuffer;
+      try {
+        const response = await fetch(this.project.ReferenceURI);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.referenceAudioBuffer = await audioBuffer;
+      } catch(e) {
+        console.log("loadReference: exception", e);
+        this.loadReferenceError = true;
+      }
     },
     loadProject: function() {
       fetch('/api/project/' + this.$route.params.project_key)
