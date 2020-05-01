@@ -1,0 +1,392 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" type="text/css" href="/ui/materialdesignicons.min.css?version=202005011416">
+  <link rel="stylesheet" type="text/css" href="/ui/vuetify.min.css?version=202005011416">
+  <link rel="stylesheet" type="text/css" href="/ui/fonts.css?version=202005011416">
+  <title>ConnectedHarmony</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="text/x-template" id="app-template">
+    <v-app>
+      <v-content>
+        <v-container fluid>
+          <v-row align="center" justify="center">
+            <v-col cols="12" xl="8" lg="10">
+              <v-card class="elevation-12">
+                <v-toolbar color="primary" dark flat>
+                  <v-toolbar-title>
+                    <v-icon dark>mdi-music</v-icon>
+                    {{ ensemble }}
+                  </v-toolbar-title>
+                  <v-spacer />
+
+                    <v-icon small dark @click.stop="aboutDialog = true" style="cursor: pointer">mdi-google-circles-extended</v-icon>
+                    <div class="ml-1 caption font-weight-thin" style="line-height: 80%; text-align: right; cursor: pointer;" @click.stop="aboutDialog = true">
+                      <div>Connected</div>
+                      <div>Harmony</div>
+                    </div>
+
+									<v-dialog v-model="aboutDialog" width="500">
+                    <v-card>
+                      <v-card-title class="headline grey lighten-2" primary-title>
+                      Über ConnectedHarmony
+                      </v-card-title>
+
+                      <v-card-text>
+                        <p>ConnectedHarmony ist ein Projekt von <a href="https://hoffmann-christian.info/">Christian Hoffmann</a>. Der Quellcode ist <a href="https://github.com/hoffie/woadkwizz">frei auf Github verfügbar</a>.</p>
+                        <p>ConnectedHarmony basiert auf diversen Open-Source-Komponenten, ohne die die Umsetzung nicht möglich gewesen wäre:</p>
+                        <ul>
+                          <li>Backend<ul>
+                            <li><a href="https://golang.org">Go</a> für die Applikations-Logik</li>
+                            <li><a href="https://github.com/gin-gonic/gin">Gin</a> als Web-Framework</li>
+                            <li><a href="https://github.com/jinzhu/gorm">gorm</a> als Datenbank-Abstraktion</li>
+                            <li><a href="https://sqlite.org">SQLite</a> als Datenbank</li>
+                          </ul></li>
+                          <li>Frontend<ul>
+                            <li><a href="https://vuejs.org">Vue</a> als reaktives JavaScript-Framework</li>
+                            <li><a href="https://router.vuejs.org">Vue-Router</a> als Request-Routing-Komponente</li>
+                            <li><a href="https://vuetifyjs.com/">Vuetify</a> für die Design-Komponenten</li>
+                            <li><a href="https://github.com/muaz-khan/RecordRTC/">RecordRTC</a> für Medien-Aufnahmen</li>
+                            <li><a href="https://fonts.google.com/">Google-Fonts</a> Roboto &amp; Material</li>
+                          </ul></li>
+                        </ul>
+
+                      </v-card-text>
+
+                    <v-divider />
+
+                    <v-card-actions>
+                      <v-spacer />
+                      <v-btn color="primary" text @click="aboutDialog = false">
+                      Schließen
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+
+                </v-toolbar>
+                <v-card-text>
+                  <router-view @ensemble-update="setEnsemble"></router-view>
+                </v-card-text>
+              </v-card>
+						</v-col>
+          </v-row>
+        </v-container>
+      </v-content>
+    </v-app>
+  </script>
+
+  <script type="text/x-template" id="index-template">
+    <div>
+      <p>ConnectedHarmony ist eine verteilte Aufnahme-Plattform für Musiker.</p>
+      <p>Interesse?</p>
+    </div>
+  </script>
+
+  <script type="text-template" id="delay-arrow-template">
+    <div>
+      <div style="line-height: 2px; padding-bottom: 0px;" :style="direction == 'left' ? 'padding-left: ' + (fast ? '15' : '8') + 'px;' : ''">&mdash;</div>
+      <div style="line-height: 3px; color: #F57C00; padding: 0 0 1px 0; font-size: 110%;" :style="direction == 'right' ? 'padding-left: ' + (fast ? '15' : '8') + 'px' : ''">
+        <template v-if="fast">
+          <template v-if="direction == 'left'">
+            &#8606;
+          </template>
+          <template v-if="direction == 'right'">
+            &#8608;
+          </template>
+        </template>
+        <template v-else>
+          <template v-if="direction == 'left'">
+            &#8592;
+          </template>
+          <template v-if="direction == 'right'">
+            &#8594;
+          </template>
+        </template>
+      </div>
+      <div style="line-height: 2px; padding-bottom: 1px;" :style="direction == 'left' ? 'padding-left: ' + (fast ? '15' : '8') + 'px;' : ''">&mdash;</div>
+      <div style="line-height: 2px; padding-bottom: 1px;" :style="direction == 'left' ? 'padding-left: ' + (fast ? '15' : '8') + 'px;' : ''">&mdash;</div>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="project-template">
+    <div>
+      <v-stepper v-model="step">
+        <v-stepper-header>
+          <v-stepper-step :complete="step > 1" step="1">Vorbereiten</v-stepper-step>
+          <v-divider />
+          <v-stepper-step :complete="step > 2" step="2">Aufnehmen</v-stepper-step>
+          <v-divider />
+          <v-stepper-step :complete="step > 3" step="3">Anhören</v-stepper-step>
+          <v-divider />
+          <v-stepper-step :complete="step > 4" step="4">Abschließen</v-stepper-step>
+        </v-stepper-header>
+        <v-stepper-items style="min-height: 400px">
+          <v-stepper-content step="1">
+            <p v-if="project.Title === undefined">
+              Projekt wird geladen... 
+              <v-progress-circular indeterminate color="primary" />
+            </p>
+            <template v-else>
+              <h1 class="title">{{ project.Title }} ({{ project.Ensemble }})</h1>
+              <p>
+                Dieses Projekt hat das Ziel, das Stück <i>{{ project.Title }}</i> gemeinsam aufzunehmen.
+                <template v-if="project.NumParticipants >= 2">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <strong class="" v-on="on">{{ project.NumParticipants }} Personen</strong>
+                    </template>
+                    <span>
+                      <template v-for="(p, idx) in project.NamedParticipants">
+                        {{ p.Name }}
+                        <template v-if="idx != project.NamedParticipants.length - 1">,</template>
+                      </template>
+                      <template v-if="project.NumParticipants != project.NamedParticipants.length"><template v-if="project.NamedParticipants.length > 0">, </template>{{ project.NumParticipants - project.NamedParticipants.length }} ohne Namensangabe
+                      </template>
+                    </span>
+                  </v-tooltip>
+                  haben bereits eine Aufnahme eingeschickt<template v-if="project.NamedParticipants.length >= 2"> &ndash; zuletzt {{ project.NamedParticipants[0].Name }} und {{ project.NamedParticipants[1].Name }}</template>.
+                </template>
+              </p>
+              <h2 class="subtitle-1 mt-2">Wie funktionierts?</h2>
+              <p>
+                Jeder nimmt dabei einfach seine Stimme auf. Damit am Ende alles gut zusammen klingt und Rhythmus und Tonhöhe passen, wird parallel zur Aufnahme eine Referenz-Aufnahme.
+                <template v-if="project.ScoreURI">Am besten machst du dir nebenher schon einmal die <a :href="project.ScoreURI">Noten</a> auf oder druckst sie dir aus.</template>
+              </p>
+              <template v-if="project.WantVideo">
+                <h2 class="subtitle-1 mt-2">Video</h2>
+                <p>
+                  Zusätzlich zum Ton soll ein Video aufgezeichnet werden. Alle Videos werden am Ende zu einer Collage zusammengefügt.
+                  <template v-if="videoSupported">Wenn es dir lieber ist, kannst du die Videoaufzeichnung auch hier ausschalten. Mit Video ist es natürlich schöner. &#128525;
+                    <v-switch v-model="useVideo" label="Video" class="ml-3"></v-switch>
+                  </template>
+                  <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät probieren (Apple-Mobilgeräte haben z.B. derzeit leider nicht die nötige Funktionalität) bzw. einen anderen, modernen Browser (Firefox, Chrome, Edge) verwenden.</template>
+                </p>
+              </template>
+              <h2 class="subtitle-1 mt-2">Auf gehts</h2>
+              <v-select :items="project.Voices" v-model="voiceID" item-text="Name" item-value="ID" label="Bitte wähle deine Stimme aus" />
+              <v-btn large color="primary" @click="step = 2" :disabled="voiceID === 0">
+                Zur Aufnahme
+                <v-icon small right dark>mdi-arrow-right</v-icon>
+              </v-btn>
+            </template>
+          </v-stepper-content>
+
+          <v-stepper-content step="2">
+            <h1 class="title">Aufnahme</h1>
+            <template v-if="mediaStream === null">
+              <p v-if="!mediaError">Dein Browser fragt dich nun nach Aufnahmerechten. Es geht weiter, wenn du diesen zugestimmt hast. Wenn nichts passiert, dann lade bitte die Seite neu.</p>
+              <p v-else>Leider gab es ein Problem beim Vorbereiten der Aufnahme. Bitte lade die Seite noch einmal neu oder probiere es auf einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. mit einem anderen Browser (Firefox, Chrome, Edge).</p>
+            </template>
+            <template v-else>
+              <p>Ein paar Hinweise, damit die Aufnahme gut gelingt:</p>
+              <v-card max-width="400" tile class="ml-3">
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon>mdi-headphones</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Kopfhörer</v-list-item-title>
+                    <p class="text--secondary">
+                      Benutze Kopfhörer bzw. ein Headset, am besten mit Kabelverbindung. Das sorgt für die beste Tonqualität.
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon>mdi-bell-sleep</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Ruhe</v-list-item-title>
+                    <p class="text--secondary">
+                      Sorge für eine ruhigen Atmosphäre (Fenster zu, Benachrichtigungstöne aus).</li>
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon>mdi-repeat</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Wiederholungen</v-list-item-title>
+                    <p class="text--secondary">
+                      Du kannst die Aufnahme so häufig wiederholen, wie du willst.
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon>mdi-clock-end</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Aushalten</v-list-item-title>
+                    <p class="text--secondary">
+                      Halte die Stille am Ende der Aufnahme bis zum Schluss aus. Die Aufnahme endet automatisch kurz nach der Begleitstimme.
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item v-if="project.BeatsBeforeStart">
+                  <v-list-item-avatar>
+                    <v-icon>mdi-music</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Auftakt</v-list-item-title>
+                    <p class="text--secondary">
+                      Es gibt {{ project.BeatsBeforeStart }} Schläge auf dem Grundton voraus.
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-card>
+
+              <v-spacer class="mt-4" />
+              <template v-else v-if="!referenceAudioBuffer">
+                <p>Referenz-Aufnahme wird geladen... <v-progress-circular indeterminate size="30" /></p>
+              </template>
+              <template v-else>
+                <v-btn large @click="toggleRecord" color="primary">
+                  <v-icon small left dark>mdi-radiobox-marked</v-icon>
+                  <template v-if="recording">
+                    abbrechen
+                  </template>
+                  <template v-else>
+                    aufnehmen
+                  </template>
+                </v-btn>
+              </template>
+            </template>
+          </v-stepper-content>
+
+          <v-stepper-content step="3">
+            <h1 class="title">Anhören</h1>
+            <template v-if="playbackSupported">
+              <v-btn large @click="togglePlayRecorded" :color="accuracyCheckVisible ? '' : 'primary'" class="ma-1" v-if="!retryVisible">
+                <template v-if="playing">
+                  <v-icon small left dark>mdi-stop</v-icon>
+                  stoppen
+                </template>
+                <template v-else>
+                  <v-icon small left dark>mdi-play</v-icon>
+                  abspielen
+                </template>
+              </v-btn>
+
+              <template v-if="accuracyCheckVisible">
+                <template>
+                  <h2 class="subtitle-1 mt-2">War der Einsatz pünktlich?</h2>
+                  <p>Für das spätere Zusammenschneiden aller Stimmen ist es sehr wichtig, dass dein Einsatz genau mit der Referenz-Aufnahme beginnt.</p>
+                  <p>Drücke die entsprechenden Knöpfe, um <strong>deine Stimme</strong> früher (links) oder später (rechts) einsetzen zu lassen. Das Ergebnis wird dir dann direkt vorgespielt.</p>
+                  <div>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 500" :disabled="delay > 2500 || playing" class="my-1"><delay-arrow direction="left" :fast="true" /></v-btn>
+                      </template>
+                      <span>Deine Stimme um 0.500 Sekunden früher einsetzen lassen.</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 20" :disabled="delay > 2980 || playing" class="my-1"><delay-arrow direction="left" :fast="false" /></v-btn>
+                      </template>
+                      <span>Deine Stimme um 0.020 Sekunden früher einsetzen lassen.</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn v-on="on" color="primary" @click="retryVisible = true; accuracyCheckVisible = false" :disabled="playing" class="my-1">Weiter</v-btn>
+                      </template>
+                      <span>Wenn dein Einsatz synchron zum Rest ist, dann gehts mit diesem Knopf weiter. Falls nötig kannst du dort auch noch einmal zu einer Neu-Aufnahme springen.</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay -= 20" :disabled="delay < 20 || playing" class="my-1"><delay-arrow direction="right" :fast="false" /></v-btn>
+
+                      </template>
+                      <span>Deine Stimme um 0.020 Sekunden später einsetzen lassen.</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay -= 500" :disabled="delay < 500 || playing" class="my-1"><delay-arrow direction="right" :fast="true" /></v-btn>
+                      </template>
+                      <span>Deine Stimme um 0.500 Sekunden später einsetzen lassen.</span>
+                    </v-tooltip>
+                  </div>
+                </template>
+              </template>
+
+              <template v-if="retryVisible">
+                <h2 class="subtitle-1 mt-2">Zufrieden?</h2>
+                <p>Bist du zufrieden mit der Qualität? Einsatz pünktlich? Keine Störgeräusche? Nicht zu laut, nicht zu leise?</p>
+                <p>Wir sind vielleicht nicht alle gewöhnt, unsere eigenen Stimmen aufgenommen zu hören. Deswegen mag Manches ungewohnt klingen. Das ist aber vollkommen okay &ndash; am Ende sind wir alle gemeinsam zu hören.</p>
+
+                <p>Wenn du trotzdem nochmal neu aufnehmen möchtest, kannst du das hier tun:</p>
+                <div><v-btn small text color="secondary" class="ma-1 mb-4" @click="step = 2">
+                  <v-icon small left dark>mdi-delete</v-icon>
+                  löschen und neu aufnehmen
+                </v-btn></div>
+
+                <template v-if="recordedVideoURL">
+                  <h2 class="subtitle-1 mt-2">Video ansehen</h2>
+                  <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen. Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein. Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen. Es ist außerdem kein Ton zu hören &ndash; auch das ist okay.</p>
+                  <video :src="recordedVideoURL" controls playsinline muted="true" volume="0" :width="videoWidth" class="ml-1"></video>
+
+                </template>
+
+                <div>
+                  <v-btn large color="primary" class="ma-1" @click="step = 4">
+                    Aufnahme passt, weiter zum Speichern
+                    <v-icon small right dark>mdi-arrow-right</v-icon>
+                  </v-btn>
+                </div>
+
+              </template>
+            </template>
+            <template v-if="!playbackSupported">
+              <p>Leider ist die Wiedergabe der Aufnahme auf deinem Endgerät nicht möglich. Du kannst deine Aufnahme aber trotzdem speichern. Alternativ kannst du es sonst auch nochmal mit einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. einem anderen Browser (Firefox, Chrome, Edge) probieren. Der auf Apple-Geräten verwendete Safari-Browser bietet beispielsweise leider nicht die nötige Funktionalität.</p>
+              <v-btn large color="primary" class="ma-4" @click="step = 4">
+                Zum Speichern
+                <v-icon small right dark>mdi-arrow-right</v-icon>
+              </v-btn>
+            </template>
+          </v-stepper-content>
+
+          <v-stepper-content step="4">
+            <h1 class="title">Speichern &amp; hochladen</h1>
+            <template v-if="!uploaded">
+              <p>Du kannst deine Aufnahme jetzt speichern und hochladen, sodass sie in den Gesamtklang eingefügt werden kann.
+              </p>
+              <p>Hinweis: Dies wird je nach Internetanbindung einige Sekunden bis Minuten dauern und benötigt einige Megabyte an Datenvolumen.</p>
+              <p>Bitte gib nun noch deinen Namen ein (wenn du das nicht möchtest, kannst du das Feld auch frei lassen).</p>
+              <v-text-field v-model="participantName" label="Dein Name" />
+              <div>
+                <v-btn @click="upload" color="primary" :disabled="uploading" :loading="uploading">
+                  Speichern
+                  <v-icon small right dark v-if="uploaded">mdi-check</v-icon>
+                  <v-icon small right dark v-else>mdi-upload</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <template v-else>
+              <v-alert type="success" class="my-2">
+              <p>Fertig &ndash; deine Aufnahme wurde hochgeladen und wird nun eingefügt. Vielen Dank!</p>
+              <p class="text--secondary">Du kannst die Seite nun schließen.</p>
+              </v-alert>
+            </template>
+            <template v-if="uploadError">
+              <v-alert type="error" class="my-2">
+                Leider ist das Speichern fehlgeschlagen. Bitte überprüfe deine Internetverbindung und versuche es erneut.
+              </v-alert>
+            </template>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-stepper>
+    </div>
+  </script>
+
+  <script type="text/javascript" src="/ui/vue.js?version=202005011416"></script>
+  <script type="text/javascript" src="/ui/vue-router.min.js?version=202005011416"></script>
+  <script type="text/javascript" src="/ui/vuetify.js?version=202005011416"></script>
+  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202005011416"></script>
+  <script type="text/javascript" src="/ui/app.js?version=202005011416"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+- Upload own audio file
+- clipping detection https://github.com/cwilso/volume-meter/blob/master/volume-meter.js
+- video
+- fadein/fadeout
+- audio buffer tuning
+- mix by voice
+- loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
