@@ -278,16 +278,17 @@
                   <h2 class="subtitle-1 mt-2">War der Einsatz pünktlich?</h2>
                   <p>Für das spätere Zusammenschneiden aller Stimmen ist es sehr wichtig, dass dein Einsatz genau mit der Referenz-Aufnahme beginnt.</p>
                   <p>Drücke die entsprechenden Knöpfe, um <strong>deine Stimme</strong> früher (links) oder später (rechts) einsetzen zu lassen. Das Ergebnis wird dir dann direkt vorgespielt.</p>
+                  <p>Aktuell eingestellte Verschiebung: {{ delay }} Millisekunden</p>
                   <div>
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 500" :disabled="delay > 2500 || playing" class="my-1"><delay-arrow direction="left" :fast="true" /></v-btn>
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 500" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="true" /></v-btn>
                       </template>
                       <span>Deine Stimme um 0.500 Sekunden früher einsetzen lassen.</span>
                     </v-tooltip>
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 20" :disabled="delay > 2980 || playing" class="my-1"><delay-arrow direction="left" :fast="false" /></v-btn>
+                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 20" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="false" /></v-btn>
                       </template>
                       <span>Deine Stimme um 0.020 Sekunden früher einsetzen lassen.</span>
                     </v-tooltip>
