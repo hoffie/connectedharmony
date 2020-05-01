@@ -21,7 +21,7 @@ const Project = {
       mediaError: false,
       audioContext: null,
       recordedBlob: null,
-      recordedVideoURL: null,
+      recordedVideoURL: '',
       referenceAudioBuffer: null,
       referenceSource: null,
       recordedPlayer: null,
@@ -75,7 +75,7 @@ const Project = {
       this.stopReference();
       this.stopRecorded();
       this.recordedBlob = null;
-      this.recordedVideoURL = null;
+      this.recordedVideoURL = '';
       var opts = {};
       var codec = 'video/webm; codecs="opus"';
       if (MediaRecorder.isTypeSupported(codec)) {
