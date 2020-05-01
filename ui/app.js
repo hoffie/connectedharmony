@@ -138,7 +138,9 @@ const Project = {
       this.metronomeSources = [];
     },
     abortRecording: function() {
-      this.mediaRecorder.stop();
+      this.recordRTC.stopRecording(function() {
+        this.recording = false;
+      }.bind(this));
       this.stopMetronome();
       this.stopReference();
       this.recordedChunks = [];
