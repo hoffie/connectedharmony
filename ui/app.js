@@ -25,7 +25,7 @@ const Project = {
       referenceAudioBuffer: null,
       referenceSource: null,
       recordedPlayer: null,
-      delay: 50,
+      delay: 0,
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
       delaySliderVisible: false,
