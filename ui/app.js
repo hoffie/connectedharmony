@@ -96,8 +96,8 @@ const Project = {
           // be delayed.
           this.recordRTC.stopRecording(function() {
             this.recording = false;
-            this.recordedBlob = this.recordRTC.getBlob();
             if (!this.recordingAborted) {
+              this.recordedBlob = this.recordRTC.getBlob();
               this.step = 3;
             }
             if (this.project.WantVideo && this.videoSupported) {
