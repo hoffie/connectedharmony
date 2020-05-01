@@ -265,6 +265,12 @@ const Project = {
     setupMedia: function() {
       // Chromium only allows initialization after a user input:
       this.audioContext = new AudioContext();
+
+      // Safari does not seem to support this...
+      if (!this.audioContext.decodeAudioData) {
+        this.mediaError = true;
+        return;
+      }
       var constraints = {
         audio: {},
       };
