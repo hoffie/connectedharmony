@@ -138,6 +138,7 @@ const Project = {
       this.metronomeSources = [];
     },
     abortRecording: function() {
+      this.recordingAborted = true;
       this.recordRTC.stopRecording(function() {
         this.recording = false;
       }.bind(this));
@@ -145,7 +146,6 @@ const Project = {
       this.stopReference();
       this.recordedChunks = [];
       this.recordedBlob = null;
-      this.recordingAborted = true;
     },
     playRecorded: async function() {
       var startTime = this.audioContext.currentTime + this.startupDelay;
