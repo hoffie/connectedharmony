@@ -90,6 +90,7 @@ const Project = {
           return;
         }
         window.setTimeout(function() {
+          this.recording = false;
           // wait some time before stopping recording because playback may
           // be delayed.
           this.recordRTC.stopRecording(function() {
