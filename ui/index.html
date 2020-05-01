@@ -327,9 +327,14 @@
 
                 <template v-if="recordedVideoURL">
                   <h2 class="subtitle-1 mt-2">Video ansehen</h2>
-                  <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen. Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein. Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen. Es ist außerdem kein Ton zu hören &ndash; auch das ist okay.</p>
+                  <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen.</p>
+                  <ul>
+                    <li>Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein.</li>
+                    <li>Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen.</li>
+                    <li>Es ist außerdem kein Ton zu hören &ndash; auch das ist okay.</li>
+                    <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
+                  </ul>
                   <video :src="recordedVideoURL" controls playsinline muted="true" volume="0" :width="videoWidth" class="ml-1"></video>
-
                 </template>
 
                 <div>
