@@ -76,14 +76,6 @@ const Project = {
       this.stopRecorded();
       this.recordedBlob = null;
       this.recordedVideoURL = '';
-      var opts = {};
-      var codec = 'video/webm; codecs="opus"';
-      if (MediaRecorder.isTypeSupported(codec)) {
-        opts = {
-          mimeType: codec,
-          audioBitsPerSecond: 96000,
-        };
-      };
       var type = this.videoSupported && this.useVideo ? 'video' : 'audio';
       this.recordRTC = RecordRTC(this.mediaStream, { type: type, });
 
