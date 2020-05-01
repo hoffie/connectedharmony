@@ -96,7 +96,7 @@ const Project = {
               this.recordedBlob = this.recordRTC.getBlob();
               this.step = 3;
             }
-            if (this.project.WantVideo && this.videoSupported) {
+            if (this.project.WantVideo && this.videoSupported && this.useVideo) {
               this.recordedVideoURL = URL.createObjectURL(this.recordedBlob);
             }
           }.bind(this));
