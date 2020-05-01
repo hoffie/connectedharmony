@@ -91,11 +91,15 @@ const Project = {
       this.recordRTC.startRecording(); // no way to schedule that start, so just start now
       this.startMetronome(startTime);
       var onended = function() {
+        if (this.recordingAborted) {
+          this.recording = false;
+          this.recordRTC.stopRecording(function() {});
+          return;
+        }
         window.setTimeout(function() {
           // wait some time before stopping recording because playback may
           // be delayed.
           this.recordRTC.stopRecording(function() {
-            this.recording = false;
             if (!this.recordingAborted) {
               this.recordedBlob = this.recordRTC.getBlob();
               this.step = 3;
