@@ -14,7 +14,6 @@ A modern browser (HTML5/JavaScript/CSS) with network connectivity to the server.
 
 ## Tech stack
 The backend is written in [Golang](https://golang.org), using [Gin](https://github.com/gin-gonic/gin) as web framework and [gorm](https://github.com/jinzhu/gorm) as object-relational mapper with an [SQLite](https://sqlite.org) backend.
-Tests are run via [Python 3](https://python.org).
 The frontend uses [Vue](https://vuejs.org) with [Vue-Router](https://router.vuejs.org) and [Vuetify](https://vuetifyjs.com/).
 Recording support is provided by [RecordRTC](https://github.com/muaz-khan/RecordRTC/).
 
