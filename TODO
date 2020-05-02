@@ -6,3 +6,4 @@
 - mix by voice
 - loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
 - convert to htmlmediaelementsource for better ios/edge support
+- metrics: number of recordings, number of projects, number of errors
