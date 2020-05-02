@@ -38,6 +38,8 @@ window.onerror = function (message, url, line, column, error) {
 	};
 	sendErrorEvent(e);
 
+	alert("Leider ist ein Fehler aufgetreten. Eventuell funktioniert die Applikation nicht (mehr) richtig. Vielleicht liegt ein temporärer Fehler vor, vielleicht liegt es aber auch am Browser/Endgerät. iPhones und alte Versionen von Microsoft Edge (blaues Symbol) funktionieren leider bisher nicht. Bitte stattdessen Firefox oder Chrome (PC, Mac, Android) probieren. Falls die Knöpfe noch funktionieren, kannst du gerne probieren, aufzunehmen/zu speichern -- vielleicht klappts ja doch. :)");
+
 	// 'false' lets normal error handling continue:
   return false;
 };
