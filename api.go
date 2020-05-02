@@ -6,18 +6,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/jinzhu/gorm"
 )
-
-var PARTICIPANT_NAME_RE *regexp.Regexp
-
-func init() {
-	PARTICIPANT_NAME_RE = regexp.MustCompile("^[^\\^°!\"§$%&/()=?*'_:;><|,#+{\\[\\]}]{0,25}$")
-}
 
 func saveRecordingMetadata(c *gin.Context) {
 	var m struct {
@@ -30,14 +23,6 @@ func saveRecordingMetadata(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "bad metadata"})
 		return
 	}
-	if !PARTICIPANT_NAME_RE.MatchString(m.ParticipantName) {
-		c.JSON(400, gin.H{"error": "invalid name"})
-		return
-	}
-	if m.OffsetMsec < 0 || m.OffsetMsec > 3000 {
-		c.JSON(400, gin.H{"error": "bad offset"})
-	}
-
 	var p Project
 	err := db.First(&p, "key = ?", c.Param("projectKey")).Error
 	if err == gorm.ErrRecordNotFound {
