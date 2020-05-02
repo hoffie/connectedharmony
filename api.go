@@ -204,3 +204,42 @@ func getProject(c *gin.Context) {
 	}
 	c.JSON(200, jp)
 }
+
+func saveErrorEvent(c *gin.Context) {
+	var jsonEvent struct {
+		ClientErrorID uint64
+		Source        string
+		Message       string
+		URI           string
+		Line          int64
+		Column        int64
+		ErrorObject   string
+	}
+	if err := c.BindJSON(&jsonEvent); err != nil {
+		log.Printf("saveErrorEvent BindJSON error: %s", err)
+		c.JSON(400, gin.H{"error": "bad event data"})
+		return
+	}
+
+	e := ErrorEvent{
+		IP:            c.ClientIP(),
+		UserAgent:     c.GetHeader("User-Agent"),
+		ClientErrorID: jsonEvent.ClientErrorID,
+		Source:        jsonEvent.Source,
+		Message:       jsonEvent.Message,
+		URI:           jsonEvent.URI,
+		Line:          jsonEvent.Line,
+		Column:        jsonEvent.Column,
+		ErrorObject:   jsonEvent.ErrorObject,
+	}
+	err := db.Save(&e).Error
+	if err != nil {
+		log.Printf("failed to error event", err)
+		c.AbortWithStatus(500)
+		return
+	}
+	c.JSON(201, gin.H{
+		"success":      true,
+		"ErrorEventID": e.ID,
+	})
+}

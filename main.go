@@ -52,6 +52,7 @@ func main() {
 	db.AutoMigrate(&Project{})
 	db.AutoMigrate(&Recording{})
 	db.AutoMigrate(&Voice{})
+	db.AutoMigrate(&ErrorEvent{})
 
 	router = gin.Default()
 	if debug {
@@ -65,6 +66,7 @@ func main() {
 	router.GET("/api/project/:projectKey", getProject)
 	router.POST("/api/project/:projectKey/recording", saveRecordingMetadata)
 	router.PUT("/api/project/:projectKey/recording/:recordingID", saveRecordingFile)
+	router.POST("/api/errors", saveErrorEvent)
 	router.Run(listen)
 }
 

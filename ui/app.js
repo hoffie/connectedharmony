@@ -207,11 +207,28 @@ const Project = {
         }
         this.uploadError = true;
         console.log("uploadMeta: Upload error (unsuccessful return code)", d);
+        var e = new Error();
+        sendErrorEvent({
+          Source: 'app.js:uploadMetadata:fetch',
+          Message: 'status',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: d,
+        });
       })
       .catch((e) => {
         console.log('Upload error:', e);
         this.uploading = false;
         this.uploadError = true;
+        sendErrorEvent({
+          Source: 'app.js:uploadMetadata:fetch',
+          Message: 'catch',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: e,
+        });
       });
     },
     uploadRecording: function(m) {
@@ -227,11 +244,28 @@ const Project = {
         }
         this.uploadError = true;
         console.log("uploadRecording: Upload error (unsuccessful return code)", d);
+        var e = new Error();
+        sendErrorEvent({
+          Source: 'app.js:uploadRecording:fetch',
+          Message: 'status',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: d,
+        });
       })
       .catch((e) => {
         console.log('Upload error:', e);
         this.uploading = false;
         this.uploadError = true;
+        sendErrorEvent({
+          Source: 'app.js:uploadRecording:fetch',
+          Message: 'catch',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: e,
+        });
       });
     },
     playReference: function(startTime, gain, onended) {
@@ -313,6 +347,14 @@ const Project = {
         this.referenceAudioBuffer = await audioBuffer;
       } catch(e) {
         console.log("loadReference: exception", e);
+        sendErrorEvent({
+          Source: 'app.js:loadReference',
+          Message: 'catch',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: error,
+        });
         this.loadReferenceError = true;
       }
     },
@@ -324,9 +366,30 @@ const Project = {
           return;
         }
         console.error("Failed to load project", d);
+        var e = new Error();
+        sendErrorEvent({
+          Source: 'app.js:loadProject:fetch',
+          Message: 'status',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: {
+            status: d.status,
+            ok: d.ok,
+            body: await d.body,
+          },
+        });
       })
       .catch(async (e) => {
         console.error('Failed to load project', e);
+        sendErrorEvent({
+          Source: 'app.js:loadProject:fetch',
+          Message: 'catch',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: error,
+        });
       });
     },
     checkVideoSupport: function() {
