@@ -10,7 +10,6 @@
 - loudness adjustment during playback
 - chrome: check if noisecancellation can be disabled
 - check for empty recording
-- recommendation to close all other apps/programs
 - preview video
 - domain
 - reference recordings per voice
