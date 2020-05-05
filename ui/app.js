@@ -278,6 +278,7 @@ const Project = {
       this.referenceGain = this.audioContext.createGain();
       this.referenceGain.gain.value = gain;
       this.referenceGain.connect(this.audioContext.destination);
+      this.referenceMediaElement.currentTime = 0;
       this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
       this.referenceSource.connect(this.referenceGain);
       this.referenceMediaElement.onended = onended;
@@ -372,7 +373,6 @@ const Project = {
     loadReference: function() {
       var audio = new Audio();
       audio.addEventListener('canplaythrough', function() {
-        console.log('canplaythrough');
         this.referenceMediaElement = audio;
       }.bind(this));
       audio.addEventListener('error', function(e) {
