@@ -12,7 +12,6 @@
 - check for empty recording
 - recommendation to close all other apps/programs
 - preview video
-- sendErrorEvent on fallback usage
 - domain
 - reference recordings per voice
 - upload progress

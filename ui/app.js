@@ -337,14 +337,35 @@ const Project = {
         .then(this.onMedia)
         .catch(function(e) {
           console.log("first getUserMedia call failed:", e);
-          //FIXME send event
+          sendErrorEvent({
+            Source: 'app.js:setupMedia',
+            Message: 'getUserMedia:first',
+            URI: e.fileName,
+            Line: e.lineNumber,
+            Column: e.columnNumber,
+            ErrorObject: {
+              error: e,
+              constaints: constraints,
+            },
+          });
           this.videoSupported = false;
-          navigator.mediaDevices.getUserMedia({audio: true})
+          constaints = {audio: true};
+          navigator.mediaDevices.getUserMedia(constraints)
             .then(this.onMedia)
             .catch(function(e) {
               console.log("second getUserMedia call failed:", e);
               this.mediaError = true;
-              //FIXME send event
+              sendErrorEvent({
+                Source: 'app.js:setupMedia',
+                Message: 'getUserMedia:second',
+                URI: e.fileName,
+                Line: e.lineNumber,
+                Column: e.columnNumber,
+                ErrorObject: {
+                  error: e,
+                  constaints: constraints,
+                },
+              });
             }.bind(this));
         }.bind(this));
     },
