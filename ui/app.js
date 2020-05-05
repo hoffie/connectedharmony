@@ -22,10 +22,10 @@ const Project = {
       audioContext: null,
       recordedBlob: null,
       recordedVideoURL: '',
-      referenceAudioBuffer: null,
+      referenceMediaElement: null,
       referenceSource: null,
       loadReferenceError: false,
-      recordedPlayer: null,
+      recordedMediaElement: null,
       delay: 0,
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
@@ -142,32 +142,37 @@ const Project = {
       }.bind(this));
       this.stopMetronome();
       this.stopReference();
-      this.recordedChunks = [];
       this.recordedBlob = null;
     },
     playRecorded: async function() {
       var startTime = this.audioContext.currentTime + this.startupDelay;
 
       this.stopRecorded();
-      this.recordedPlayer = this.audioContext.createBufferSource();
-      var fileReader = new FileReader();
-      fileReader.onload = async function(e) {
-        var arrayBuffer = e.target.result;
-        this.recordedPlayer.buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-        this.recordedPlayer.start(startTime, this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart));
-        this.recordedPlayer.addEventListener('ended', function() {
+      this.recordedMediaElement = new Audio();
+      this.recordedMediaElement.oncanplaythrough = function() {
+        this.recordedMediaElement.oncanplaythrough = null;
+        console.log(this.recordedMediaElement.currentTime);
+        console.log(this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart));
+        this.recordedMediaElement.currentTime += this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart)
+        this.recordedMediaElement.addEventListener('ended', function() {
           console.log("recorded player ended");
           this.playing = false;
         }.bind(this));
+        window.setTimeout(function() {
+          if (this.playing) {
+            this.recordedMediaElement.play();
+          }
+        }.bind(this), 1000*(startTime - this.audioContext.currentTime));
       }.bind(this);
-      fileReader.readAsArrayBuffer(this.recordedBlob);
-      this.recordedPlayer.connect(this.audioContext.destination);
+      this.recordedSource = this.audioContext.createMediaElementSource(this.recordedMediaElement);
+      this.recordedSource.connect(this.audioContext.destination);
+      this.recordedMediaElement.src = URL.createObjectURL(this.recordedBlob);
       this.playReference(startTime + this.delay/1000, 0.1);
     },
     stopRecorded: function() {
-      if (this.recordedPlayer) {
-        this.recordedPlayer.stop();
-        this.recordedPlayer.disconnect();
+      if (this.recordedMediaElement) {
+        this.recordedMediaElement.pause();
+        this.recordedSource.disconnect();
       }
       this.stopReference();
     },
@@ -273,21 +278,23 @@ const Project = {
       this.referenceGain = this.audioContext.createGain();
       this.referenceGain.gain.value = gain;
       this.referenceGain.connect(this.audioContext.destination);
-      this.referenceSource = this.audioContext.createBufferSource();
-      this.referenceSource.buffer = this.referenceAudioBuffer;
+      this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
       this.referenceSource.connect(this.referenceGain);
-      this.referenceSource.start(startTime);
-      if (typeof onended !== undefined) {
-        this.referenceSource.addEventListener('ended', onended);
-      }
+      this.referenceMediaElement.onended = onended;
+      window.setTimeout(function() {
+        // no way to schedule an exact start
+        this.referenceMediaElement.play();
+      }.bind(this), 1000*(startTime - this.audioContext.currentTime));
     },
     stopReference: function() {
+      this.referenceMediaElement.pause();
       if (this.referenceSource) {
-        this.referenceSource.stop();
         this.referenceSource.disconnect();
+        this.referenceSource = null;
       }
       if (this.referenceGain) {
         this.referenceGain.disconnect();
+        this.referenceGain = null;
       }
     },
     setupMedia: function() {
@@ -330,33 +337,36 @@ const Project = {
         .then(this.onMedia)
         .catch(function(e) {
           console.log("first getUserMedia call failed:", e);
+          //FIXME send event
           this.videoSupported = false;
           navigator.mediaDevices.getUserMedia({audio: true})
             .then(this.onMedia)
             .catch(function(e) {
               console.log("second getUserMedia call failed:", e);
               this.mediaError = true;
+              //FIXME send event
             }.bind(this));
         }.bind(this));
     },
-    loadReference: async function() {
-      try {
-        const response = await fetch(this.project.ReferenceURI);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-        this.referenceAudioBuffer = await audioBuffer;
-      } catch(e) {
-        console.log("loadReference: exception", e);
+    loadReference: function() {
+      var audio = new Audio();
+      audio.addEventListener('canplaythrough', function() {
+        console.log('canplaythrough');
+        this.referenceMediaElement = audio;
+      }.bind(this));
+      audio.addEventListener('error', function(e) {
+        console.log("loadReference failed:", e);
         sendErrorEvent({
           Source: 'app.js:loadReference',
-          Message: 'catch',
+          Message: 'onerror',
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
           ErrorObject: error,
         });
         this.loadReferenceError = true;
-      }
+      });
+      audio.src = this.project.ReferenceURI;
     },
     loadProject: function() {
       fetch('/api/project/' + this.$route.params.project_key)
