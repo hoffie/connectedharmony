@@ -151,8 +151,6 @@ const Project = {
       this.recordedMediaElement = new Audio();
       this.recordedMediaElement.oncanplaythrough = function() {
         this.recordedMediaElement.oncanplaythrough = null;
-        console.log(this.recordedMediaElement.currentTime);
-        console.log(this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart));
         this.recordedMediaElement.currentTime += this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart)
         this.recordedMediaElement.addEventListener('ended', function() {
           console.log("recorded player ended");
