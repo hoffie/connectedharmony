@@ -273,12 +273,8 @@ const Project = {
     },
     playReference: function(startTime, gain, onended) {
       this.stopReference();
-      this.referenceGain = this.audioContext.createGain();
-      this.referenceGain.gain.value = gain;
-      this.referenceGain.connect(this.audioContext.destination);
       this.referenceMediaElement.currentTime = 0;
-      this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
-      this.referenceSource.connect(this.referenceGain);
+      this.referenceGain.gain.value = gain;
       this.referenceMediaElement.onended = onended;
       window.setTimeout(function() {
         // no way to schedule an exact start
@@ -287,14 +283,6 @@ const Project = {
     },
     stopReference: function() {
       this.referenceMediaElement.pause();
-      if (this.referenceSource) {
-        this.referenceSource.disconnect();
-        this.referenceSource = null;
-      }
-      if (this.referenceGain) {
-        this.referenceGain.disconnect();
-        this.referenceGain = null;
-      }
     },
     setupMedia: function() {
       // Chromium only allows initialization after a user input:
@@ -370,9 +358,14 @@ const Project = {
     },
     loadReference: function() {
       var audio = new Audio();
-      audio.addEventListener('canplaythrough', function() {
+      audio.oncanplaythrough = function() {
+        audio.oncanplaythrough = null;
         this.referenceMediaElement = audio;
-      }.bind(this));
+        this.referenceGain = this.audioContext.createGain();
+        this.referenceGain.connect(this.audioContext.destination);
+        this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
+        this.referenceSource.connect(this.referenceGain);
+      }.bind(this);
       audio.addEventListener('error', function(e) {
         console.log("loadReference failed:", e);
         sendErrorEvent({
