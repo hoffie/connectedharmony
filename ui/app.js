@@ -144,7 +144,7 @@ const Project = {
       this.stopReference();
       this.recordedBlob = null;
     },
-    playRecorded: async function() {
+    playRecorded: function() {
       var startTime = this.audioContext.currentTime + this.startupDelay;
 
       this.stopRecorded();
