@@ -5,5 +5,14 @@
 - audio buffer tuning
 - mix by voice
 - loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
-- convert to htmlmediaelementsource for better ios/edge support
 - metrics: number of recordings, number of projects, number of errors
+- video recording suggestions: lighting
+- loudness adjustment during playback
+- chrome: check if noisecancellation can be disabled
+- check for empty recording
+- recommendation to close all other apps/programs
+- preview video
+- sendErrorEvent on fallback usage
+- domain
+- reference recordings per voice
+- upload progress
