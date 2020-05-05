@@ -383,7 +383,7 @@ const Project = {
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
-          ErrorObject: error,
+          ErrorObject: e,
         });
         this.loadReferenceError = true;
       });
@@ -419,7 +419,7 @@ const Project = {
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
-          ErrorObject: error,
+          ErrorObject: e,
         });
       });
     },
