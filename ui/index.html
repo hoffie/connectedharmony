@@ -387,6 +387,7 @@
                   <v-icon small right dark v-else>mdi-upload</v-icon>
                 </v-btn>
               </div>
+              <v-progress-linear v-if="uploading" :indeterminate="uploadProgress === null || uploadProgress === 100" :value="uploadProgress" class="mt-2" />
             </template>
             <template v-else>
               <v-alert type="success" class="my-2">
@@ -396,7 +397,7 @@
             </template>
             <template v-if="uploadError">
               <v-alert type="error" class="my-2">
-                Leider ist das Speichern fehlgeschlagen. Bitte überprüfe deine Internetverbindung und versuche es erneut.
+                Leider ist das Speichern fehlgeschlagen. Vielleicht gibt es ein temporäres Problem. Probiere es bitte in ein paar Minuten erneut.
               </v-alert>
             </template>
           </v-stepper-content>

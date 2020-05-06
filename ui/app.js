@@ -16,6 +16,7 @@ const Project = {
       uploading: false,
       uploaded: false,
       uploadError: false,
+      uploadProgress: null,
       videoSupport: false,
       mediaStream: null,
       mediaError: false,
@@ -235,41 +236,64 @@ const Project = {
       });
     },
     uploadRecording: function(m) {
-      fetch('/api/project/' + this.$route.params.project_key + '/recording/' + m.RecordingID, {
-        method: 'PUT',
-        body: this.recordedBlob,
-      })
-      .then((d) => {
+      this.uploadProgress = null;
+      // We have to use XHR because fetch() doesn't support upload progress in 2020.
+      var xhr = new XMLHttpRequest();
+      if (xhr.upload) {
+        xhr.upload.onprogress = function(e) {
+          this.uploadProgress = 100 * e.loaded / e.total;
+          console.log(this.uploadProgress);
+        }.bind(this);
+        xhr.upload.onerror = function(e) {
+          this.uploading = false;
+          this.uploadError = true;
+          sendErrorEvent({
+            Source: 'app.js:uploadRecording:xhr.upload',
+            Message: 'onerror',
+            URI: e.fileName,
+            Line: e.lineNumber,
+            Column: e.columnNumber,
+            ErrorObject: e,
+          });
+        }.bind(this);
+      }
+      xhr.onload = function() {
         this.uploading = false;
-        if (d && d.status == 200 && d.ok) {
+        if (xhr.status == 200) {
           this.uploaded = true;
           return;
         }
         this.uploadError = true;
-        console.log("uploadRecording: Upload error (unsuccessful return code)", d);
+        console.log("uploadRecording: Upload error (unsuccessful return code)", xhr);
         var e = new Error();
         sendErrorEvent({
-          Source: 'app.js:uploadRecording:fetch',
-          Message: 'status',
+          Source: 'app.js:uploadRecording:xhr',
+          Message: 'onload',
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
-          ErrorObject: d,
+          ErrorObject: {
+            'status': xhr.status,
+            'responseText': xhr.responseText,
+          },
         });
-      })
-      .catch((e) => {
-        console.log('Upload error:', e);
+      }.bind(this);
+      xhr.onerror = function(e) {
         this.uploading = false;
         this.uploadError = true;
         sendErrorEvent({
-          Source: 'app.js:uploadRecording:fetch',
-          Message: 'catch',
+          Source: 'app.js:uploadRecording:xhr.upload',
+          Message: 'onerror',
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
           ErrorObject: e,
         });
-      });
+      }.bind(this);
+      xhr.responseType = 'json';
+      xhr.open('PUT', '/api/project/' + this.$route.params.project_key + '/recording/' + m.RecordingID);
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+      xhr.send(this.recordedBlob);
     },
     playReference: function(startTime, gain, onended) {
       this.stopReference();
