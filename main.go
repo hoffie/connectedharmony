@@ -33,11 +33,11 @@ func init() {
 	if err := os.MkdirAll(dataPath, 0o700); err != nil {
 		log.Printf("failed to create data dir", err)
 	}
-	dbPath = filepath.Join(dataPath, "db.sqlite")
 }
 
 func main() {
 	flag.Parse()
+	dbPath = filepath.Join(dataPath, "db.sqlite")
 
 	if !debug {
 		gin.SetMode(gin.ReleaseMode)
