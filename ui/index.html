@@ -391,15 +391,15 @@
             </template>
             <template v-else>
               <v-alert type="success" class="my-2">
-                <p>Fertig &ndash; deine Aufnahme wurde hochgeladen und wird nun eingefügt. Vielen Dank!</p>
-                <p>Du kannst die Seite nun schließen.</p>
-                <p>Wenn du willst, kannst du deine Aufnahme noch für dich selbst abspeichern: <v-btn text @click="downloadRecording">Auf dem Gerät speichern</v-btn></p>
+                Fertig &ndash; deine Aufnahme wurde hochgeladen und wird nun eingefügt. Vielen Dank!<br />
+                Du kannst die Seite nun schließen.<br />
+                Wenn du willst, kannst du deine Aufnahme noch für dich selbst abspeichern: <v-btn text @click="downloadRecording">Auf dem Gerät speichern</v-btn>
               </v-alert>
             </template>
             <template v-if="uploadError">
               <v-alert type="error" class="my-2">
-                <p>Leider ist das Speichern fehlgeschlagen. Vielleicht gibt es ein temporäres Problem. Probiere es bitte in ein paar Minuten erneut.</p>
-                <p>Falls es nicht klappt, kannst du deine Aufnahme auch abspeichern und den Ansprechpartnern auf einem anderen Weg (E-Mail, OwnCloud) zukommen lassen: <v-btn text @click="downloadRecording">Auf dem Gerät speichern</v-btn></p>
+                Leider ist das Speichern fehlgeschlagen. Vielleicht gibt es ein temporäres Problem. Probiere es bitte in ein paar Minuten erneut.<br />
+                Falls es nicht klappt, kannst du deine Aufnahme auch abspeichern und den Ansprechpartnern auf einem anderen Weg (E-Mail, OwnCloud) zukommen lassen: <v-btn text @click="downloadRecording">Auf dem Gerät speichern</v-btn>
               </v-alert>
             </template>
           </v-stepper-content>
