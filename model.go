@@ -15,7 +15,6 @@ type Project struct {
 	MetronomeBeatsPerMinute   uint
 	MetronomeBeepFrequency    float64
 	ScoreURI                  string
-	ReferenceURI              string
 	//Description string
 	WantVideo  bool
 	Voices     []Voice
@@ -38,9 +37,10 @@ type Recording struct {
 }
 
 type Voice struct {
-	ID        uint64
-	ProjectID uint64 `gorm:"unique_index:idx_projectid_name; not null"`
-	Name      string `gorm:"unique_index:idx_projectid_name; not null"`
+	ID           uint64
+	ProjectID    uint64 `gorm:"unique_index:idx_projectid_name; not null"`
+	Name         string `gorm:"unique_index:idx_projectid_name; not null"`
+	ReferenceURI string
 }
 
 type ErrorEvent struct {

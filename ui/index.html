@@ -167,8 +167,8 @@
                 </p>
               </template>
               <h2 class="subtitle-1 mt-2">Auf gehts</h2>
-              <v-select :items="project.Voices" v-model="voiceID" item-text="Name" item-value="ID" label="Bitte wähle deine Stimme aus" />
-              <v-btn large color="primary" @click="step = 2" :disabled="voiceID === 0">
+              <v-select :items="project.Voices" v-model="voice" return-object item-text="Name" label="Bitte wähle deine Stimme aus" />
+              <v-btn large color="primary" @click="step = 2" :disabled="voice === null">
                 Zur Aufnahme
                 <v-icon small right dark>mdi-arrow-right</v-icon>
               </v-btn>

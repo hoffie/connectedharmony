@@ -121,7 +121,6 @@ type jsonProject struct {
 	Ensemble          string
 	Title             string
 	ScoreURI          string
-	ReferenceURI      string
 	BeatsPerMeasure   uint
 	BeatsPerMinute    uint
 	BeatsBeforeStart  uint
@@ -133,8 +132,9 @@ type jsonProject struct {
 }
 
 type jsonVoice struct {
-	ID   uint64
-	Name string
+	ID           uint64
+	Name         string
+	ReferenceURI string
 }
 
 type jsonParticipant struct {
@@ -165,7 +165,6 @@ func getProject(c *gin.Context) {
 		Ensemble:          p.Ensemble,
 		Title:             p.Title,
 		ScoreURI:          p.ScoreURI,
-		ReferenceURI:      p.ReferenceURI,
 		BeatsPerMeasure:   p.MetronomeBeatsPerMeasure,
 		BeatsPerMinute:    p.MetronomeBeatsPerMinute,
 		BeatsBeforeStart:  p.MetronomeBeatsBeforeStart,
@@ -177,8 +176,9 @@ func getProject(c *gin.Context) {
 	}
 	for i, v := range p.Voices {
 		jp.Voices[i] = jsonVoice{
-			ID:   v.ID,
-			Name: v.Name,
+			ID:           v.ID,
+			Name:         v.Name,
+			ReferenceURI: v.ReferenceURI,
 		}
 	}
 	for _, r := range p.Recordings {

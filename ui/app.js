@@ -39,7 +39,7 @@ const Project = {
       // loaded via json:
       project: {},
       // to be submitted at the end:
-      voiceID: 0,
+      voice: null,
       participantName: '',
       useVideo: false,
       videoSupported: false,
@@ -200,7 +200,7 @@ const Project = {
     },
     uploadMetadata: function() {
       var metadata = {
-        VoiceID: this.voiceID,
+        VoiceID: this.voice.ID,
         ParticipantName: this.participantName,
         OffsetMsec: this.delay,
         HasVideo: this.useVideo,
@@ -414,7 +414,7 @@ const Project = {
         });
         this.loadReferenceError = true;
       });
-      audio.src = this.project.ReferenceURI;
+      audio.src = this.voice.ReferenceURI;
     },
     loadProject: function() {
       fetch('/api/project/' + this.$route.params.project_key)

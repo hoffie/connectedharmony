@@ -12,5 +12,4 @@
 - check for empty recording
 - preview video
 - domain
-- reference recordings per voice
 - bug: chrome: reference track is missing during playback
