@@ -262,6 +262,7 @@
                 </template>
               </template>
               <template v-else>
+                <v-progress-linear :value="recordProgress" :indeterminate="recordProgress == 100 || recordProgress == 0 && recording" class="my-2" />
                 <v-btn large @click="toggleRecord" color="primary">
                   <v-icon small left dark>mdi-radiobox-marked</v-icon>
                   <template v-if="recording">

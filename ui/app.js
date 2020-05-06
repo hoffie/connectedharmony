@@ -23,11 +23,13 @@ const Project = {
       audioContext: null,
       recordedBlob: null,
       recordedVideoURL: '',
+      recordProgress: 0,
       referenceMediaElement: null,
       referenceSource: null,
       loadReferenceError: false,
       recordedMediaElement: null,
       delay: 0,
+      teardownDelay: 2.5, // time to continue recording after reference ended
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
       delaySliderVisible: false,
@@ -103,9 +105,15 @@ const Project = {
               this.recordedVideoURL = URL.createObjectURL(this.recordedBlob);
             }
           }.bind(this));
-        }.bind(this), 2500);
+        }.bind(this), this.teardownDelay*1000);
       }.bind(this);
       this.playReference(startTime + this.getTimeToBeat(this.project.BeatsBeforeStart), 1, onended);
+      this.updateRecordProgress();
+    },
+    updateRecordProgress: function() {
+      if (!this.recording) return;
+      this.recordProgress = 100 * this.referenceMediaElement.currentTime / this.referenceMediaElement.duration;
+      window.setTimeout(this.updateRecordProgress.bind(this), 500);
     },
     getTimeToBeat: function(beat) {
       return beat * 60/this.project.BeatsPerMinute;
@@ -144,6 +152,7 @@ const Project = {
       this.stopMetronome();
       this.stopReference();
       this.recordedBlob = null;
+      this.recordProgress = 0;
     },
     playRecorded: function() {
       var startTime = this.audioContext.currentTime + this.startupDelay;
