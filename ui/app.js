@@ -295,6 +295,9 @@ const Project = {
       xhr.setRequestHeader('Content-Type', 'application/octet-stream');
       xhr.send(this.recordedBlob);
     },
+    downloadRecording: function() {
+      invokeSaveAsDialog(this.recordedBlob, 'recording.webm');
+    },
     playReference: function(startTime, gain, onended) {
       this.stopReference();
       this.referenceMediaElement.currentTime = 0;
