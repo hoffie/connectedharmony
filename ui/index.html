@@ -2,9 +2,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" type="text/css" href="/ui/materialdesignicons.min.css?version=202005052353">
-  <link rel="stylesheet" type="text/css" href="/ui/vuetify.min.css?version=202005052353">
-  <link rel="stylesheet" type="text/css" href="/ui/fonts.css?version=202005052353">
+  <link rel="stylesheet" type="text/css" href="/ui/materialdesignicons.min.css?version=202005080013">
+  <link rel="stylesheet" type="text/css" href="/ui/vuetify.min.css?version=202005080013">
+  <link rel="stylesheet" type="text/css" href="/ui/fonts.css?version=202005080013">
   <title>ConnectedHarmony</title>
 </head>
 <body>
@@ -23,19 +23,20 @@
                   </v-toolbar-title>
                   <v-spacer />
 
-                    <v-icon small dark @click.stop="aboutDialog = true" style="cursor: pointer">mdi-google-circles-extended</v-icon>
-                    <div class="ml-1 caption font-weight-thin" style="line-height: 80%; text-align: right; cursor: pointer;" @click.stop="aboutDialog = true">
-                      <div>Connected</div>
-                      <div>Harmony</div>
-                    </div>
+                  <v-icon small dark @click.stop="aboutDialog = true" style="cursor: pointer">mdi-google-circles-extended</v-icon>
+                  <div class="ml-1 caption font-weight-thin" style="line-height: 80%; text-align: right; cursor: pointer;" @click.stop="aboutDialog = true">
+                    <div>Connected</div>
+                    <div>Harmony</div>
+                  </div>
 
 									<v-dialog v-model="aboutDialog" width="500">
                     <v-card>
-                      <v-card-title class="headline grey lighten-2" primary-title>
-                      Über ConnectedHarmony
+                      <v-card-title primary-title>
+                        Über ConnectedHarmony
                       </v-card-title>
+                      <v-divider />
 
-                      <v-card-text>
+                      <v-card-text class="pt-2">
                         <p>ConnectedHarmony ist ein Projekt von <a href="https://hoffmann-christian.info/">Christian Hoffmann</a>. Der Quellcode ist <a href="https://github.com/hoffie/connectedharmony">frei auf Github verfügbar</a>.</p>
                         <p>ConnectedHarmony basiert auf diversen Open-Source-Komponenten, ohne die die Umsetzung nicht möglich gewesen wäre:</p>
                         <ul>
@@ -56,16 +57,16 @@
 
                       </v-card-text>
 
-                    <v-divider />
+                      <v-divider />
 
-                    <v-card-actions>
-                      <v-spacer />
-                      <v-btn color="primary" text @click="aboutDialog = false">
-                      Schließen
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="primary" text @click="aboutDialog = false">
+                        Schließen
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
 
                 </v-toolbar>
                 <v-card-text>
@@ -253,6 +254,31 @@
               </v-card>
 
               <v-spacer class="mt-4" />
+              <template v-if="videoSupported && useVideo && project.WantVideo">
+                <v-dialog v-model="videoPreviewDialog" width="500">
+                  <v-card>
+                    <v-card-title primary-title>
+                      Video-Vorschau
+                    </v-card-title>
+                    <v-divider />
+
+                    <v-card-text class="d-flex justify-center pa-2">
+                      <video id="video-preview" :width="videoWidth" muted />
+                    </v-card-text>
+                    <v-divider />
+                    <v-card-actions>
+                      <v-spacer />
+                      <v-btn color="primary" text @click="hideVideoPreview">
+                      Schließen
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+                <v-btn color="secondary" outlined text @click="showVideoPreview">
+                  Video-Vorschau
+                </v-btn>
+                <v-spacer class="mt-4" />
+              </template>
               <template v-else v-if="!referenceMediaElement">
                 <v-alert type="error" class="my-2" v-if="loadReferenceError">
                   Leider konnte die Referenz-Aufnahme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
@@ -352,7 +378,9 @@
                     <li>Es ist außerdem kein Ton zu hören &ndash; auch das ist okay.</li>
                     <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
                   </ul>
-                  <video :src="recordedVideoURL" controls playsinline muted="true" volume="0" :width="videoWidth" class="ml-1"></video>
+                  <div class="d-flex justify-center pa-1">
+                    <video :src="recordedVideoURL" controls playsinline muted="true" volume="0" :width="videoWidth" />
+                  </div>
                 </template>
 
                 <div>
@@ -412,10 +440,10 @@
   </script>
 
   <script type="text/javascript" src="/ui/errorhandler.js"></script>
-  <script type="text/javascript" src="/ui/vue.min.js?version=202005052353"></script>
-  <script type="text/javascript" src="/ui/vue-router.min.js?version=202005052353"></script>
-  <script type="text/javascript" src="/ui/vuetify.js?version=202005052353"></script>
-  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202005052353"></script>
-  <script type="text/javascript" src="/ui/app.js?version=202005052353"></script>
+  <script type="text/javascript" src="/ui/vue.min.js?version=202005080013"></script>
+  <script type="text/javascript" src="/ui/vue-router.min.js?version=202005080013"></script>
+  <script type="text/javascript" src="/ui/vuetify.js?version=202005080013"></script>
+  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202005080013"></script>
+  <script type="text/javascript" src="/ui/app.js?version=202005080013"></script>
 </body>
 </html>

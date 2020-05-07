@@ -17,7 +17,6 @@ const Project = {
       uploaded: false,
       uploadError: false,
       uploadProgress: null,
-      videoSupport: false,
       mediaStream: null,
       mediaError: false,
       audioContext: null,
@@ -36,6 +35,7 @@ const Project = {
       retryVisible: false,
       accuracyCheckVisible: false,
       step: 1,
+      videoPreviewDialog: false,
       // loaded via json:
       project: {},
       // to be submitted at the end:
@@ -52,7 +52,7 @@ const Project = {
     },
     videoWidth: function() {
       switch (this.$vuetify.breakpoint.name) {
-        case 'xs': return 120;
+        case 'xs': return 140;
         case 'sm': return 200;
         default: return 500;
       };
@@ -461,6 +461,22 @@ const Project = {
           }
         }.bind(this))
       }.bind(this));
+    },
+    showVideoPreview: function() {
+      this.videoPreviewDialog = true;
+      this.$nextTick(function() {
+        var v = document.querySelector('video#video-preview');
+        v.onloadedmetadata = function() {
+          v.play();
+        };
+        v.srcObject = this.mediaStream;
+      }.bind(this));
+    },
+    hideVideoPreview: function() {
+      var v = document.querySelector('video#video-preview');
+      v.pause();
+      v.srcObject = null;
+      this.videoPreviewDialog = false;
     },
   },
   mounted: function() {

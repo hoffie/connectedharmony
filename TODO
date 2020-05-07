@@ -10,6 +10,5 @@
 - loudness adjustment during playback
 - chrome: check if noisecancellation can be disabled
 - check for empty recording
-- preview video
 - domain
 - bug: chrome: reference track is missing during playback
