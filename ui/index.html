@@ -134,7 +134,7 @@
             <template v-else>
               <h1 class="title">{{ project.Title }} ({{ project.Ensemble }})</h1>
               <p>
-                Dieses Projekt hat das Ziel, das Stück <i>{{ project.Title }}</i> gemeinsam aufzunehmen.
+                Willkommen zur gemeinsamen Aufnahme des Stücks <i>{{ project.Title }}</i>!
                 <template v-if="project.NumParticipants >= 2">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -154,20 +154,26 @@
               </p>
               <h2 class="subtitle-1 mt-2">Wie funktionierts?</h2>
               <p>
-                Jeder nimmt dabei einfach seine Stimme auf. Damit am Ende alles gut zusammen klingt und Rhythmus und Tonhöhe passen, wird parallel zur Aufnahme eine Referenz-Aufnahme.
+                Jeder nimmt einfach seine Stimme auf. Damit am Ende alles gut zusammen klingt und Rhythmus und Tonhöhe passen, wird parallel zur Aufnahme eine Begleit-Stimme abgespielt.
                 <template v-if="project.ScoreURI">Am besten machst du dir nebenher schon einmal die <a :href="project.ScoreURI">Noten</a> auf oder druckst sie dir aus.</template>
               </p>
               <template v-if="project.WantVideo">
                 <h2 class="subtitle-1 mt-2">Video</h2>
                 <p>
                   Zusätzlich zum Ton soll ein Video aufgezeichnet werden. Alle Videos werden am Ende zu einer Collage zusammengefügt.
-                  <template v-if="videoSupported">Wenn es dir lieber ist, kannst du die Videoaufzeichnung auch hier ausschalten. Mit Video ist es natürlich schöner. &#128525;
+                  <template v-if="videoSupported">Wenn es dir lieber ist, kannst du die Videoaufzeichnung auch hier ausschalten.
                     <v-switch v-model="useVideo" label="Video" class="ml-3"></v-switch>
+                    <p v-if="!useVideo">Schade &ndash; mit Video wäre es natürlich schöner. &#128525;</p>
                   </template>
-                  <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät probieren (Apple-Mobilgeräte haben z.B. derzeit leider nicht die nötige Funktionalität) bzw. einen anderen, modernen Browser (Firefox, Chrome) verwenden.</template>
+                  <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät/Browser probieren.</template>
                 </p>
               </template>
-              <h2 class="subtitle-1 mt-2">Auf gehts</h2>
+              <h2 class="subtitle-1 mt-2">Los gehts!</h2>
+              <v-alert dense type="success" outlined icon="mdi-check" class="body-2">
+                Für die Aufnahme werden Daten (Bild-/Ton-Aufnahme, Browser-Version, Fehlermeldungen, IP-Adresse, Name) zum Betreiber dieser Web-App hochgeladen.
+                Die Übertragung erfolgt verschlüsselt.
+                Die erhobenen Daten werden ausschließlich für die Aufnahme genutzt und den Verantwortlichen ({{ project.Ensemble }}) weitergeleitet. Nach Fertigstellung werden die Einzel-Aufnahmen gelöscht.
+              </v-alert>
               <v-select :items="project.Voices" v-model="voice" return-object item-text="Name" label="Bitte wähle deine Stimme aus" />
               <v-btn large color="primary" @click="step = 2" :disabled="voice === null">
                 Zur Aufnahme
@@ -192,7 +198,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Headset</v-list-item-title>
                     <p class="text--secondary">
-                      Benutze Kopfhörer bzw. ein Headset, am besten mit Kabelverbindung. Aufnahmen mit laut hörbarer Referenz-Aufnahme können leider nicht verwendet werden, genauso wie Aufnahmen ohne gleichzeitig angehörte Referenz-Aufnahme.
+                      Benutze unbedingt Kopfhörer, damit du die Begleitaufnahme hörst und sie nicht in deiner Aufnahme stört.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -203,7 +209,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Andere Apps</v-list-item-title>
                     <p class="text--secondary">
-                      Schließe alle anderen offenen Tabs, Programme und Apps.
+                      Schließe alle anderen Tabs, Programme und Apps.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -214,7 +220,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Ruhe</v-list-item-title>
                     <p class="text--secondary">
-                      Sorge für eine ruhigen Atmosphäre (Fenster zu, Benachrichtigungstöne aus).</li>
+                      Sorge für eine ruhige Umgebung: Schließe die Fenster &amp; schalte Benachrichtigungen auf stumm.</li>
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -225,7 +231,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Wiederholungen</v-list-item-title>
                     <p class="text--secondary">
-                      Du kannst die Aufnahme so häufig wiederholen, wie du willst.
+                      Du kannst die Aufnahme erst einmal üben und so häufig wiederholen, wie du willst.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -236,7 +242,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Aushalten</v-list-item-title>
                     <p class="text--secondary">
-                      Halte die Stille am Ende der Aufnahme bis zum Schluss aus. Die Aufnahme endet automatisch.
+                      Halte die Stille am Ende aus bis die Aufnahme automatisch endet.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -281,10 +287,10 @@
               </template>
               <template v-else v-if="!referenceMediaElement">
                 <v-alert type="error" class="my-2" v-if="loadReferenceError">
-                  Leider konnte die Referenz-Aufnahme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
+                  Leider konnte die Begleit-Stimme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
                 </v-alert>
                 <template v-else>
-                  <p>Referenz-Aufnahme wird geladen... <v-progress-circular indeterminate size="30" /></p>
+                  <p>Begleit-Stimme wird geladen... <v-progress-circular indeterminate size="30" /></p>
                 </template>
               </template>
               <template v-else>
