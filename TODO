@@ -1,14 +1,10 @@
-- Upload own audio file
 - clipping detection https://github.com/cwilso/volume-meter/blob/master/volume-meter.js
-- video
-- fadein/fadeout
-- audio buffer tuning
-- mix by voice
 - loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
 - metrics: number of recordings, number of projects, number of errors
 - video recording suggestions: lighting
 - loudness adjustment during playback
 - chrome: check if noisecancellation can be disabled
 - check for empty recording
-- domain
 - bug: chrome: reference track is missing during playback
+- project load error handling
+- record abort detection
