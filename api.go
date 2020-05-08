@@ -6,10 +6,22 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/jinzhu/gorm"
+)
+
+var (
+	audioTypes = []struct {
+		extension string
+		mime      string
+	}{
+		{".webm", "audio/webm"},
+		{".mp4", "audio/mp4"},
+		{".mp3", "audio/mpeg"},
+	}
 )
 
 func saveRecordingMetadata(c *gin.Context) {
@@ -132,13 +144,18 @@ type jsonProject struct {
 }
 
 type jsonVoice struct {
-	ID           uint64
-	Name         string
-	ReferenceURI string
+	ID             uint64
+	Name           string
+	ReferenceMedia []jsonReferenceMedia
 }
 
 type jsonParticipant struct {
 	Name string
+}
+
+type jsonReferenceMedia struct {
+	Path string
+	Type string
 }
 
 func getProject(c *gin.Context) {
@@ -175,10 +192,25 @@ func getProject(c *gin.Context) {
 		WantVideo:         p.WantVideo,
 	}
 	for i, v := range p.Voices {
+		references := make([]jsonReferenceMedia, 0)
+		base := filepath.Join(p.Key, strconv.Itoa(int(v.ID)))
+		for _, mediaVariant := range audioTypes {
+			path := base + mediaVariant.extension
+			diskPath := filepath.Join(staticPath, path)
+			s, err := os.Stat(diskPath)
+			if err != nil || s.IsDir() {
+				log.Printf("missing reference media at diskPath=%s for Project.Key=%s and Voice.ID=%d", diskPath, p.Key, v.ID)
+				continue
+			}
+			references = append(references, jsonReferenceMedia{
+				Path: path,
+				Type: mediaVariant.mime,
+			})
+		}
 		jp.Voices[i] = jsonVoice{
-			ID:           v.ID,
-			Name:         v.Name,
-			ReferenceURI: v.ReferenceURI,
+			ID:             v.ID,
+			Name:           v.Name,
+			ReferenceMedia: references,
 		}
 	}
 	for _, r := range p.Recordings {

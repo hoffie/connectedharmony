@@ -393,16 +393,16 @@ const Project = {
         }.bind(this));
     },
     loadReference: function() {
-      var audio = new Audio();
-      audio.oncanplaythrough = function() {
-        audio.oncanplaythrough = null;
-        this.referenceMediaElement = audio;
+      var media = new Audio();
+      media.oncanplaythrough = function() {
+        media.oncanplaythrough = null;
+        this.referenceMediaElement = media;
         this.referenceGain = this.audioContext.createGain();
         this.referenceGain.connect(this.audioContext.destination);
         this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
         this.referenceSource.connect(this.referenceGain);
       }.bind(this);
-      audio.addEventListener('error', function(e) {
+      media.addEventListener('error', function(e) {
         console.log("loadReference failed:", e);
         sendErrorEvent({
           Source: 'app.js:loadReference',
@@ -414,7 +414,13 @@ const Project = {
         });
         this.loadReferenceError = true;
       });
-      audio.src = this.voice.ReferenceURI;
+      for (var i = 0; i < this.voice.ReferenceMedia.length; i++) {
+        var ref = this.voice.ReferenceMedia[i];
+        var s = document.createElement('source');
+        s.src = window.location.protocol + "//" + window.location.host + "/static/" + ref.Path;
+        s.type = ref.Type;
+        media.appendChild(s);
+      }
     },
     loadProject: function() {
       fetch('/api/project/' + this.$route.params.project_key)

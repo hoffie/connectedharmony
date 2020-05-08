@@ -37,10 +37,9 @@ type Recording struct {
 }
 
 type Voice struct {
-	ID           uint64
-	ProjectID    uint64 `gorm:"unique_index:idx_projectid_name; not null"`
-	Name         string `gorm:"unique_index:idx_projectid_name; not null"`
-	ReferenceURI string
+	ID        uint64
+	ProjectID uint64 `gorm:"unique_index:idx_projectid_name; not null"`
+	Name      string `gorm:"unique_index:idx_projectid_name; not null"`
 }
 
 type ErrorEvent struct {
