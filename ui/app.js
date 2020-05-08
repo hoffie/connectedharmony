@@ -90,6 +90,7 @@ const Project = {
         if (this.recordingAborted) {
           this.recording = false;
           this.recordRTC.stopRecording(function() {});
+          this.recordProgress = 0;
           return;
         }
         window.setTimeout(function() {
@@ -104,6 +105,7 @@ const Project = {
             if (this.project.WantVideo && this.videoSupported && this.useVideo) {
               this.recordedVideoURL = URL.createObjectURL(this.recordedBlob);
             }
+            this.recordProgress = 0;
           }.bind(this));
         }.bind(this), this.teardownDelay*1000);
       }.bind(this);
