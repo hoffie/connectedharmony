@@ -26,6 +26,7 @@ const Project = {
       referenceMediaElement: null,
       referenceSource: null,
       loadReferenceError: false,
+      loadReferenceSuccess: false,
       recordedMediaElement: null,
       delay: 0,
       teardownDelay: 2.5, // time to continue recording after reference ended
@@ -178,6 +179,15 @@ const Project = {
       this.recordedSource = this.audioContext.createMediaElementSource(this.recordedMediaElement);
       this.recordedSource.connect(this.audioContext.destination);
       this.recordedMediaElement.src = URL.createObjectURL(this.recordedBlob);
+      this.recordedMediaElement.preload = 'auto';
+      // This forces that all browsers (especially Safari) actually start doing
+      // something:
+      this.recordedMediaElement.play();
+      // As we don't want to really start playing now, stop after a very short time:
+      window.setTimeout(function() {
+        this.recordedMediaElement.pause();
+        this.recordedMediaElement.currentTime = 0;
+      }.bind(this), 10);
       this.playReference(startTime + this.delay/1000, 0.1);
     },
     stopRecorded: function() {
@@ -395,28 +405,16 @@ const Project = {
             }.bind(this));
         }.bind(this));
     },
+    onReferenceReady: function() {
+      this.referenceMediaElement.oncanplaythrough = null;
+      if (this.loadReferenceSuccess) return;
+      this.referenceGain = this.audioContext.createGain();
+      this.referenceGain.connect(this.audioContext.destination);
+      this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
+      this.referenceSource.connect(this.referenceGain);
+      this.loadReferenceSuccess = true;
+    },
     loadReference: function() {
-      var media = new Audio();
-      media.oncanplaythrough = function() {
-        media.oncanplaythrough = null;
-        this.referenceMediaElement = media;
-        this.referenceGain = this.audioContext.createGain();
-        this.referenceGain.connect(this.audioContext.destination);
-        this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
-        this.referenceSource.connect(this.referenceGain);
-      }.bind(this);
-      media.addEventListener('error', function(e) {
-        console.log("loadReference failed:", e);
-        sendErrorEvent({
-          Source: 'app.js:loadReference',
-          Message: 'onerror',
-          URI: e.fileName,
-          Line: e.lineNumber,
-          Column: e.columnNumber,
-          ErrorObject: e,
-        });
-        this.loadReferenceError = true;
-      });
       if (this.voice.ReferenceMedia.length < 1) {
         console.log("loadReference failed:", "empty source list");
         sendErrorEvent({
@@ -429,6 +427,22 @@ const Project = {
         this.loadReferenceError = true;
         return;
       }
+      var media = new Audio();
+      this.referenceMediaElement = media;
+      media.preload = 'auto';
+      media.oncanplaythrough = this.onReferenceReady;
+      media.onerror = function(e) {
+        console.log("loadReference failed:", e);
+        sendErrorEvent({
+          Source: 'app.js:loadReference',
+          Message: 'onerror',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: e,
+        });
+        this.loadReferenceError = true;
+      }.bind(this);
       for (var i = 0; i < this.voice.ReferenceMedia.length; i++) {
         var ref = this.voice.ReferenceMedia[i];
         var s = document.createElement('source');
@@ -436,6 +450,34 @@ const Project = {
         s.type = ref.Type;
         media.appendChild(s);
       }
+      // This forces that all browsers (especially Safari) actually start doing
+      // something:
+      media.play();
+      // As we don't want to really start playing now, stop after a very short time:
+      window.setTimeout(function() {
+        media.pause();
+        this.referenceMediaElement.currentTime = 0;
+      }.bind(this), 10);
+      // As another fallback, we just accept a partially loaded reference file
+      // after some time:
+      window.setTimeout(function() {
+        if (this.loadReferenceSuccess) return; // oncanplaythrough fired already
+        var e = new Error();
+        sendErrorEvent({
+          Source: 'app.js:loadReference:fallback',
+          Message: 'canplaythrough did not fire within 3 sec',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: {
+            readyState: media.readyState,
+          },
+        });
+        if (media.readyState <= 1) {
+          alert("Die Begleitstimme konnte bisher nicht geladen werden. Wir versuchen einfach, trotzdem weiterzumachen. Wenn du allerdings während der Aufnahme keine Begleitstimme hörst, dann brich bitte ab und probiere es später nochmal -- ggf. mit einem anderen Endgerät/Browser (Chrome, Firefox).");
+        }
+        this.onReferenceReady();
+      }.bind(this), 3000);
     },
     loadProject: function() {
       fetch('/api/project/' + this.$route.params.project_key)

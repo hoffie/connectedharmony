@@ -302,7 +302,7 @@
                 </v-btn>
                 <v-spacer class="mt-4" />
               </template>
-              <template v-else v-if="!referenceMediaElement">
+              <template v-else v-if="!loadReferenceSuccess">
                 <v-alert type="error" class="my-2" v-if="loadReferenceError">
                   Leider konnte die Begleit-Stimme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
                 </v-alert>
