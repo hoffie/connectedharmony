@@ -38,6 +38,7 @@ const Project = {
       videoPreviewDialog: false,
       // loaded via json:
       project: {},
+      loadProjectError: null,
       // to be submitted at the end:
       voice: null,
       participantName: '',
@@ -416,6 +417,18 @@ const Project = {
         });
         this.loadReferenceError = true;
       });
+      if (this.voice.ReferenceMedia.length < 1) {
+        console.log("loadReference failed:", "empty source list");
+        sendErrorEvent({
+          Source: 'app.js:loadReference',
+          Message: 'empty-source-list',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+        });
+        this.loadReferenceError = true;
+        return;
+      }
       for (var i = 0; i < this.voice.ReferenceMedia.length; i++) {
         var ref = this.voice.ReferenceMedia[i];
         var s = document.createElement('source');
@@ -445,6 +458,12 @@ const Project = {
             body: await d.body,
           },
         });
+
+        if (d && d.status == 404) {
+          this.loadProjectError = 'notfound';
+        } else {
+          this.loadProjectError = 'unknown';
+        }
       })
       .catch(async (e) => {
         console.error('Failed to load project', e);
@@ -456,6 +475,7 @@ const Project = {
           Column: e.columnNumber,
           ErrorObject: e,
         });
+        this.loadProjectError = 'unknown';
       });
     },
     checkVideoSupport: function() {

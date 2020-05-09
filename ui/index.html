@@ -127,10 +127,16 @@
         </v-stepper-header>
         <v-stepper-items style="min-height: 400px">
           <v-stepper-content step="1">
-            <p v-if="project.Title === undefined">
-              Projekt wird geladen... 
-              <v-progress-circular indeterminate color="primary" />
-            </p>
+            <template v-if="project.Title === undefined">
+              <v-alert type="error" class="my-2" v-if="loadProjectError">
+                <template v-if="loadProjectError == 'notfound'">Das Projekt wurde nicht (mehr) gefunden. Eventuell ist der Link falsch oder die Aufnahme des Projekts wurde beendet.</template>
+                <template v-else>Es ist ein Fehler beim Laden des Projekts aufgetreten. Bitte versuche es später erneut, indem du die Seite neu lädst.</template>
+              </v-alert>
+              <p v-else>
+                Projekt wird geladen...
+                <v-progress-circular indeterminate color="primary" />
+              </p>
+            </template>
             <template v-else>
               <h1 class="title">{{ project.Title }} ({{ project.Ensemble }})</h1>
               <p>

@@ -6,5 +6,4 @@
 - chrome: check if noisecancellation can be disabled
 - check for empty recording
 - bug: chrome: reference track is missing during playback
-- project load error handling
 - record abort detection
