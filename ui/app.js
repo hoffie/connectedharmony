@@ -49,8 +49,7 @@ const Project = {
   },
   computed: {
     playbackSupported: function() {
-      if (!this.audioContext) return false;
-      return !!this.audioContext.decodeAudioData;
+      return !!this.audioContext;
     },
     videoWidth: function() {
       switch (this.$vuetify.breakpoint.name) {
@@ -180,14 +179,6 @@ const Project = {
       this.recordedSource.connect(this.audioContext.destination);
       this.recordedMediaElement.src = URL.createObjectURL(this.recordedBlob);
       this.recordedMediaElement.preload = 'auto';
-      // This forces that all browsers (especially Safari) actually start doing
-      // something:
-      this.recordedMediaElement.play();
-      // As we don't want to really start playing now, stop after a very short time:
-      window.setTimeout(function() {
-        this.recordedMediaElement.pause();
-        this.recordedMediaElement.currentTime = 0;
-      }.bind(this), 10);
       this.playReference(startTime + this.delay/1000, 0.1);
     },
     stopRecorded: function() {
@@ -337,11 +328,6 @@ const Project = {
       // Chromium only allows initialization after a user input:
       this.audioContext = new AudioContext();
 
-      // Safari does not seem to support this...
-      if (!this.audioContext.decodeAudioData) {
-        this.mediaError = true;
-        return;
-      }
       var constraints = {
         audio: {},
       };
@@ -450,14 +436,6 @@ const Project = {
         s.type = ref.Type;
         media.appendChild(s);
       }
-      // This forces that all browsers (especially Safari) actually start doing
-      // something:
-      media.play();
-      // As we don't want to really start playing now, stop after a very short time:
-      window.setTimeout(function() {
-        media.pause();
-        this.referenceMediaElement.currentTime = 0;
-      }.bind(this), 10);
       // As another fallback, we just accept a partially loaded reference file
       // after some time:
       window.setTimeout(function() {
@@ -599,12 +577,18 @@ const app = new Vue({
     return {
       ensemble: '',
 			aboutDialog: false,
+      supportDialog: false,
     };
   },
   methods: {
     setEnsemble: function(e) {
       this.ensemble = e;
     },
+  },
+  mounted: function() {
+    if (/Presto|Edge\/|Trident|iPhone|iPad/.test(window.navigator.userAgent)) {
+      this.supportDialog = true;
+    }
   },
 }).$mount('#app');
 
