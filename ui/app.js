@@ -25,6 +25,7 @@ const Project = {
       recordProgress: 0,
       referenceMediaElement: null,
       referenceSource: null,
+      referenceGainValue: 25,
       loadReferenceError: false,
       loadReferenceSuccess: false,
       recordedMediaElement: null,
@@ -179,7 +180,7 @@ const Project = {
       this.recordedSource.connect(this.audioContext.destination);
       this.recordedMediaElement.src = URL.createObjectURL(this.recordedBlob);
       this.recordedMediaElement.preload = 'auto';
-      this.playReference(startTime + this.delay/1000, 0.1);
+      this.playReference(startTime + this.delay/1000, this.referenceGainValue/100);
     },
     stopRecorded: function() {
       if (this.recordedMediaElement) {
@@ -544,6 +545,10 @@ const Project = {
       if (this.mediaStream !== null) return;
       this.setupMedia();
       this.loadReference();
+    },
+    'referenceGainValue': function() {
+      if (!this.referenceGain) return;
+      this.referenceGain.gain.setValueAtTime(this.referenceGainValue/100, this.audioContext.currentTime);
     },
   },
 }
