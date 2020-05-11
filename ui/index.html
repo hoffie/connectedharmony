@@ -346,7 +346,7 @@
               </template>
               <template v-else>
                 <v-progress-linear :value="recordProgress" :indeterminate="recordProgress == 100 || recordProgress == 0 && recording" class="my-2" />
-                <v-btn large @click="toggleRecord" :color="recording ? '' : 'primary'">
+                <v-btn large @click="toggleRecord" :color="recording ? 'secondary' : 'primary'">
                   <v-icon small left dark>mdi-radiobox-marked</v-icon>
                   <template v-if="recording">
                     abbrechen
@@ -362,7 +362,7 @@
           <v-stepper-content step="3">
             <h1 class="title">Anhören</h1>
             <template v-if="playbackSupported">
-              <v-btn large @click="togglePlayRecorded" :color="accuracyCheckVisible ? '' : 'primary'" class="ma-1" v-if="!retryVisible">
+              <v-btn large @click="togglePlayRecorded" :color="accuracyCheckVisible ? '' : 'primary'" class="ma-1">
                 <template v-if="playing">
                   <v-icon small left dark>mdi-stop</v-icon>
                   stoppen
@@ -396,7 +396,7 @@
                     </v-tooltip>
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" color="primary" @click="retryVisible = true; accuracyCheckVisible = false" :disabled="playing" class="my-1">Weiter</v-btn>
+                        <v-btn v-on="on" color="primary" @click="retryVisible = true" :disabled="playing" class="my-1">Weiter</v-btn>
                       </template>
                       <span>Wenn dein Einsatz synchron zum Rest ist, dann gehts mit diesem Knopf weiter. Falls nötig kannst du dort auch noch einmal zu einer Neu-Aufnahme springen.</span>
                     </v-tooltip>
