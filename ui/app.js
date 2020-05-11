@@ -576,7 +576,7 @@ const app = new Vue({
   data: function() {
     return {
       ensemble: '',
-			aboutDialog: false,
+      aboutDialog: false,
       supportDialog: false,
     };
   },
@@ -584,11 +584,21 @@ const app = new Vue({
     setEnsemble: function(e) {
       this.ensemble = e;
     },
+    isProblematicBrowser: function() {
+      if (!navigator.mediaDevices.getUserMedia) {
+        return true;
+      }
+      if (!window.MediaStreamRecorder || !window.AudioContext) {
+        return true;
+      }
+      if (/Presto|Edge\/|Trident|iPhone|iPad/.test(window.navigator.userAgent)) {
+        return true;
+      }
+      return false;
+    },
   },
   mounted: function() {
-    if (/Presto|Edge\/|Trident|iPhone|iPad/.test(window.navigator.userAgent)) {
-      this.supportDialog = true;
-    }
+    this.supportDialog = this.isProblematicBrowser();
   },
 }).$mount('#app');
 
