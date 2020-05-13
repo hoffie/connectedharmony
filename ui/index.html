@@ -201,9 +201,9 @@
                 <h2 class="subtitle-1 mt-2">Video</h2>
                 <p>
                   Zusätzlich zum Ton soll ein Video aufgezeichnet werden. Alle Videos werden am Ende zu einer Collage zusammengefügt.
-                  <template v-if="videoSupported">Wenn es dir lieber ist, kannst du die Videoaufzeichnung auch hier ausschalten.
+                  <template v-if="videoSupported">Wenn du dich mit dem Video absolut gar nicht anfreunden kannst, kannst du die Videoaufzeichnung auch hier ausschalten.
                     <v-switch v-model="useVideo" label="Video" class="ml-3"></v-switch>
-                    <p v-if="!useVideo">Schade &ndash; mit Video wäre es natürlich schöner. &#128525;</p>
+                    <p v-if="!useVideo">Schade &ndash; mit Video wäre es natürlich schöner! &#128525;</p>
                   </template>
                   <template v-else>Leider wurde an diesem Gerät keine unterstützte Kamera erkannt. Du kannst trotzdem mit einer Ton-Aufnahme teilnehmen. Alternativ kannst es mit an einem anderen Endgerät/Browser probieren.</template>
                 </p>
