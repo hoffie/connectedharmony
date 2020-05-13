@@ -82,8 +82,12 @@ const Project = {
       this.stopRecorded();
       this.recordedBlob = null;
       this.recordedVideoURL = '';
-      var type = this.videoSupported && this.useVideo ? 'video' : 'audio';
-      this.recordRTC = RecordRTC(this.mediaStream, { type: type, });
+      var config = {
+        type: this.videoSupported && this.useVideo ? 'video' : 'audio',
+        audioBitsPerSecond: 192*1000,
+        videoBitsPerSecond: 1024*1000,
+      }
+      this.recordRTC = RecordRTC(this.mediaStream, config);
 
       var startTime = this.audioContext.currentTime + this.startupDelay;
       this.recordRTC.startRecording(); // no way to schedule that start, so just start now
@@ -417,7 +421,7 @@ const Project = {
           Column: e.columnNumber,
           ErrorObject: {
             error: e,
-            requestedConstaints: constraints,
+            constaints: constraints,
             supportedConstaints: constraints,
           },
         });
