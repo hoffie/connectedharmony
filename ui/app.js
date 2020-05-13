@@ -391,6 +391,41 @@ const Project = {
               });
             }.bind(this));
         }.bind(this));
+      var checkMedia = function() {
+        if (this.mediaStream !== null) return;
+        var e = new Error();
+        navigator.mediaDevices.enumerateDevices()
+          .then(function(devices) {
+            sendErrorEvent({
+              Source: 'app.js:setupMedia',
+              Message: 'device list',
+              URI: e.fileName,
+              Line: e.lineNumber,
+              Column: e.columnNumber,
+              ErrorObject: {
+                error: e,
+                constaints: constraints,
+                devices: devices,
+              },
+            });
+          });
+        sendErrorEvent({
+          Source: 'app.js:setupMedia',
+          Message: 'no mediaStream yet',
+          URI: e.fileName,
+          Line: e.lineNumber,
+          Column: e.columnNumber,
+          ErrorObject: {
+            error: e,
+            requestedConstaints: constraints,
+            supportedConstaints: constraints,
+          },
+        });
+      }.bind(this);
+      window.setTimeout(checkMedia, 10000);
+      window.setTimeout(checkMedia, 20000);
+      window.setTimeout(checkMedia, 30000);
+      window.setTimeout(checkMedia, 60000);
     },
     onReferenceReady: function() {
       this.referenceMediaElement.oncanplaythrough = null;
