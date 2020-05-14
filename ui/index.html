@@ -225,8 +225,17 @@
           <v-stepper-content step="2">
             <h1 class="title">Aufnahme</h1>
             <template v-if="mediaStream === null">
-              <p v-if="!mediaError">Dein Browser fragt dich nun nach Aufnahmerechten. Es geht weiter, wenn du diesen zugestimmt hast. Wenn nichts passiert, dann lade bitte die Seite neu.</p>
+              <p v-if="!mediaError">
+                Dein Browser fragt dich nun nach Aufnahmerechten. Es geht weiter, wenn du diesen zugestimmt hast. Wenn nichts passiert, dann lade bitte die Seite neu.
+                <template v-if="videoSupported && useVideo">Schalte ggf. auch einmal die Videofunktion aus.</template>
+                <v-progress-linear indeterminate class="my-2" />
+              </p>
               <p v-else>Leider gab es ein Problem beim Vorbereiten der Aufnahme. Bitte lade die Seite noch einmal neu oder probiere es auf einem anderen Gerät (z.B. PC statt Handy/Tablet) bzw. mit einem anderen Browser (Firefox, Chrome).</p>
+              <p>
+                <v-btn text @click="setupMedia">
+                  Nochmal probieren
+                </v-btn>
+              </p>
             </template>
             <template v-else>
               <p>Ein paar Hinweise, damit die Aufnahme gut gelingt:</p>
@@ -326,7 +335,7 @@
                     <v-card-actions>
                       <v-spacer />
                       <v-btn color="primary" text @click="hideVideoPreview">
-                      Schließen
+                        Schließen
                       </v-btn>
                     </v-card-actions>
                   </v-card>
