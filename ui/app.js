@@ -422,7 +422,7 @@ const Project = {
           ErrorObject: {
             error: e,
             constaints: constraints,
-            supportedConstaints: supportedConstaints,
+            supportedConstaints: supportedConstraints,
           },
         });
       }.bind(this);
