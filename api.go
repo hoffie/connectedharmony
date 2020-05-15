@@ -30,6 +30,8 @@ func saveRecordingMetadata(c *gin.Context) {
 		ParticipantName string
 		OffsetMsec      int64
 		HasVideo        bool
+		NumAttempts     int
+		NumErrors       int
 	}
 	if err := c.BindJSON(&m); err != nil {
 		c.JSON(400, gin.H{"error": "bad metadata"})
@@ -66,6 +68,8 @@ func saveRecordingMetadata(c *gin.Context) {
 		OffsetMsec:      m.OffsetMsec,
 		HasVideo:        m.HasVideo,
 		UserAgent:       c.GetHeader("User-Agent"),
+		NumAttempts:     m.NumAttempts,
+		NumErrors:       m.NumErrors,
 	}
 	err = db.Save(&r).Error
 	if err != nil {

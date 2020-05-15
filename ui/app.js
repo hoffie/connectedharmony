@@ -46,6 +46,7 @@ const Project = {
       participantName: '',
       useVideo: false,
       videoSupported: false,
+      numAttempts: 0,
     };
   },
   computed: {
@@ -213,6 +214,8 @@ const Project = {
         ParticipantName: this.participantName,
         OffsetMsec: this.delay,
         HasVideo: this.useVideo,
+        NumAttempts: this.numAttempts,
+        NumErrors: window.sendErrorEventID || -1,
       };
       fetch('/api/project/' + this.$route.params.project_key + '/recording', {
         method: 'POST',
@@ -581,6 +584,7 @@ const Project = {
     },
     'step': function() {
       if (this.step != 2) return;
+      this.numAttempts++;
       if (this.mediaStream !== null) return;
       this.setupMedia();
       this.loadReference();

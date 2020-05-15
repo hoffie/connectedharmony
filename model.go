@@ -30,10 +30,9 @@ type Recording struct {
 	OffsetMsec      int64
 	Uploaded        bool
 	UserAgent       string `gorm:"size:512"`
-	//Integrated bool
-	//Reviewed bool
-	HasVideo bool
-	//AudioWeight uint
+	HasVideo        bool
+	NumAttempts     int
+	NumErrors       int
 }
 
 type Voice struct {

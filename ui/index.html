@@ -224,6 +224,10 @@
 
           <v-stepper-content step="2">
             <h1 class="title">Aufnahme</h1>
+            <v-alert type="info" class="my-2" v-if="numAttempts >= 3">
+              <p>Falls es Probleme bei der Aufnahme gibt, dann wende dich am besten kurz an die Leute, von denen du den Link erhalten hast.</p>
+              <p>Musikalisch gilt: Leider braucht man manchmal ein paar Versuche, bis man zufrieden ist. Schicke deine Aufnahme aber auf jeden Fall ein, auch wenn du nicht 100%ig zufrieden bist.</p>
+            </v-alert>
             <template v-if="mediaStream === null">
               <p v-if="!mediaError">
                 Dein Browser fragt dich nun nach Aufnahmerechten. Es geht weiter, wenn du diesen zugestimmt hast. Wenn nichts passiert, dann lade bitte die Seite neu.
