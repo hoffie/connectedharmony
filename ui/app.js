@@ -639,7 +639,7 @@ const app = new Vue({
       if (!window.MediaStreamRecorder || !window.AudioContext) {
         return true;
       }
-      if (/Presto|Edge\/|Trident|iPhone|iPad/.test(window.navigator.userAgent)) {
+      if (/Presto|Edge\/|Trident|iPhone|iPad|Mac OS X.*Safari/.test(window.navigator.userAgent)) {
         return true;
       }
       return false;
