@@ -25,7 +25,7 @@ const Project = {
       recordProgress: 0,
       referenceMediaElement: null,
       referenceSource: null,
-      referenceGainValue: 25,
+      referenceGainValue: 15,
       loadReferenceError: false,
       loadReferenceSuccess: false,
       recordedMediaElement: null,
@@ -169,6 +169,7 @@ const Project = {
       this.stopRecorded();
       this.recordedMediaElement = new Audio();
       this.recordedMediaElement.oncanplaythrough = function() {
+        this.recordedMediaElement.volume = 1;
         this.recordedMediaElement.oncanplaythrough = null;
         this.recordedMediaElement.currentTime += this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart)
         this.recordedMediaElement.addEventListener('ended', function() {

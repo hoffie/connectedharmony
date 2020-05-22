@@ -387,12 +387,13 @@
                 </template>
               </v-btn>
 
+              <h2 class="subtitle-1 mt-2">Begleit-Lautstärke anpassen</h2>
               <v-slider v-model="referenceGainValue" prepend-icon="mdi-playlist-music" />
-              <v-alert v-if="referenceGainValue < 20" type="warning" class="my-2">
+              <v-alert v-if="referenceGainValue < 15" type="warning" class="my-2">
                 Wenn du die Begleitstimme sehr leise drehen musst, um deine Aufnahme zu hören, ist vielleicht deine Aufnahme zu leise. Probiere es in diesem Fall näher am Mikrofon, mit getrageneren Tönen oder mit einer empfindlicheren Mikrofoneinstellung (z.B. am PC: Windows-Mixer).
               </v-alert>
 
-              <v-alert v-if="referenceGainValue > 50" type="warning" class="my-2">
+              <v-alert v-if="referenceGainValue > 60" type="warning" class="my-2">
                 Wenn du die Begleitstimme sehr laut drehen musst, um sie gut zu hören, ist vielleicht deine Aufnahme zu laut. Probiere es in diesem Fall etwas weiter weg vom Mikrofon, mit ruhigeren Tönen oder mit einer weniger empfindlichen Mikrofoneinstellung (z.B. am PC: Windows-Mixer).
               </v-alert>
 
@@ -459,7 +460,7 @@
                     <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
                   </ul>
                   <div class="d-flex justify-center pa-1">
-                    <video :src="recordedVideoURL" controls playsinline muted="true" volume="0" :width="videoWidth" />
+                    <video :src="recordedVideoURL" controls playsinline :width="videoWidth" />
                   </div>
                 </template>
 
