@@ -183,8 +183,7 @@
                     </template>
                     <span>
                       <template v-for="(p, idx) in project.NamedParticipants">
-                        {{ p.Name }}
-                        <template v-if="idx != project.NamedParticipants.length - 1">,</template>
+                        {{ p.Name }}<template v-if="idx != project.NamedParticipants.length - 1">,</template>
                       </template>
                       <template v-if="project.NumParticipants != project.NamedParticipants.length"><template v-if="project.NamedParticipants.length > 0">, </template>{{ project.NumParticipants - project.NamedParticipants.length }} ohne Namensangabe
                       </template>
