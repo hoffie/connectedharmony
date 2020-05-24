@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -64,7 +65,7 @@ func saveRecordingMetadata(c *gin.Context) {
 	r := Recording{
 		ProjectID:       p.ID,
 		VoiceID:         v.ID,
-		ParticipantName: m.ParticipantName,
+		ParticipantName: strings.TrimSpace(m.ParticipantName),
 		OffsetMsec:      m.OffsetMsec,
 		HasVideo:        m.HasVideo,
 		UserAgent:       c.GetHeader("User-Agent"),
@@ -217,11 +218,17 @@ func getProject(c *gin.Context) {
 			ReferenceMedia: references,
 		}
 	}
+	nameDedup := make(map[string]bool, 0)
 	for _, r := range p.Recordings {
 		if r.ParticipantName == "" {
 			continue
 		}
+		key := fmt.Sprintf("%d-%s", r.VoiceID, r.ParticipantName)
+		if _, ok := nameDedup[key]; ok {
+			continue
+		}
 		jp.NamedParticipants = append(jp.NamedParticipants, jsonParticipant{Name: r.ParticipantName})
+		nameDedup[key] = true
 	}
 	c.JSON(200, jp)
 }
