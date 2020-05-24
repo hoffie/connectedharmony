@@ -344,7 +344,7 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
-                <v-btn color="secondary" outlined text @click="showVideoPreview">
+                <v-btn color="secondary" outlined text @click="showVideoPreview" :disabled="recording">
                   Video-Vorschau
                 </v-btn>
                 <v-spacer class="mt-4" />
@@ -455,7 +455,6 @@
                   <ul>
                     <li>Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein.</li>
                     <li>Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen.</li>
-                    <li>Es ist außerdem kein Ton zu hören &ndash; auch das ist okay.</li>
                     <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
                   </ul>
                   <div class="d-flex justify-center pa-1">
