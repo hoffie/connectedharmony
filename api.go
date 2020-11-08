@@ -23,6 +23,13 @@ var (
 		{".mp4", "audio/mp4"},
 		{".mp3", "audio/mpeg"},
 	}
+	videoTypes = []struct {
+		extension string
+		mime      string
+	}{
+		{".webm", "video/webm"},
+		{".mp4", "video/mp4"},
+	}
 )
 
 func saveRecordingMetadata(c *gin.Context) {
@@ -146,6 +153,7 @@ type jsonProject struct {
 	NamedParticipants []jsonParticipant
 	NumParticipants   int
 	WantVideo         bool
+	ReferenceIsVideo  bool
 }
 
 type jsonVoice struct {
@@ -195,11 +203,16 @@ func getProject(c *gin.Context) {
 		NamedParticipants: make([]jsonParticipant, 0),
 		NumParticipants:   len(p.Recordings),
 		WantVideo:         p.WantVideo,
+		ReferenceIsVideo:  p.ReferenceIsVideo,
 	}
 	for i, v := range p.Voices {
 		references := make([]jsonReferenceMedia, 0)
 		base := filepath.Join(p.Key, strconv.Itoa(int(v.ID)))
-		for _, mediaVariant := range audioTypes {
+		types := audioTypes
+		if p.ReferenceIsVideo {
+			types = videoTypes
+		}
+		for _, mediaVariant := range types {
 			path := base + mediaVariant.extension
 			diskPath := filepath.Join(staticPath, path)
 			s, err := os.Stat(diskPath)

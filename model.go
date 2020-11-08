@@ -16,9 +16,10 @@ type Project struct {
 	MetronomeBeepFrequency    float64
 	ScoreURI                  string
 	//Description string
-	WantVideo  bool
-	Voices     []Voice
-	Recordings []Recording
+	WantVideo        bool
+	ReferenceIsVideo bool
+	Voices           []Voice
+	Recordings       []Recording
 }
 
 type Recording struct {

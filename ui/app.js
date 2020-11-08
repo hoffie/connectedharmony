@@ -29,7 +29,7 @@ const Project = {
       loadReferenceError: false,
       loadReferenceSuccess: false,
       recordedMediaElement: null,
-      delay: 0,
+      delay: 50,
       teardownDelay: 2.5, // time to continue recording after reference ended
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
@@ -89,6 +89,12 @@ const Project = {
         videoBitsPerSecond: 1024*1000,
       }
       this.recordRTC = RecordRTC(this.mediaStream, config);
+      if (this.project.ReferenceIsVideo) {
+        var container = document.querySelector('#reference-container');
+        container.innerHTML = '';
+        container.appendChild(this.referenceMediaElement);
+        container.scrollIntoView();
+      }
 
       var startTime = this.audioContext.currentTime + this.startupDelay;
       this.recordRTC.startRecording(); // no way to schedule that start, so just start now
@@ -125,6 +131,7 @@ const Project = {
       window.setTimeout(this.updateRecordProgress.bind(this), 500);
     },
     getTimeToBeat: function(beat) {
+      if (!this.project.BeatsPerMinute) return 0;
       return beat * 60/this.project.BeatsPerMinute;
     },
     startMetronome: function(startTime) {
@@ -164,29 +171,27 @@ const Project = {
       this.recordProgress = 0;
     },
     playRecorded: function() {
-      var startTime = this.audioContext.currentTime + this.startupDelay;
-
       this.stopRecorded();
+      var startTime = this.audioContext.currentTime + this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart);
       this.recordedMediaElement = new Audio();
       this.recordedMediaElement.oncanplaythrough = function() {
         this.recordedMediaElement.volume = 1;
         this.recordedMediaElement.oncanplaythrough = null;
-        this.recordedMediaElement.currentTime += this.startupDelay + this.getTimeToBeat(this.project.BeatsBeforeStart)
+        // recordedMediaElement.currentTime cannot be used for seeking reliably
+        // across browsers because it depends on browsers adding the necessary
+        // metadata during recording. At least Firefox doesn't seem to do that
+        // in 11/2020.
+        this.recordedSource = this.audioContext.createMediaElementSource(this.recordedMediaElement);
+        this.recordedSource.connect(this.audioContext.destination);
         this.recordedMediaElement.addEventListener('ended', function() {
           console.log("recorded player ended");
           this.playing = false;
         }.bind(this));
-        window.setTimeout(function() {
-          if (this.playing) {
-            this.recordedMediaElement.play();
-          }
-        }.bind(this), 1000*(startTime - this.audioContext.currentTime));
+        this.playReference(startTime + this.delay/1000, this.referenceGainValue/100);
+        this.recordedMediaElement.play();
       }.bind(this);
-      this.recordedSource = this.audioContext.createMediaElementSource(this.recordedMediaElement);
-      this.recordedSource.connect(this.audioContext.destination);
       this.recordedMediaElement.src = URL.createObjectURL(this.recordedBlob);
       this.recordedMediaElement.preload = 'auto';
-      this.playReference(startTime + this.delay/1000, this.referenceGainValue/100);
     },
     stopRecorded: function() {
       if (this.recordedMediaElement) {
@@ -264,7 +269,6 @@ const Project = {
       if (xhr.upload) {
         xhr.upload.onprogress = function(e) {
           this.uploadProgress = 100 * e.loaded / e.total;
-          console.log(this.uploadProgress);
         }.bind(this);
         xhr.upload.onerror = function(e) {
           this.uploading = false;
@@ -457,7 +461,12 @@ const Project = {
         this.loadReferenceError = true;
         return;
       }
-      var media = new Audio();
+      var media;
+      if (this.project.ReferenceIsVideo) {
+        media = document.createElement('video');
+      } else {
+        media = new Audio();
+      }
       this.referenceMediaElement = media;
       media.preload = 'auto';
       media.oncanplaythrough = this.onReferenceReady;

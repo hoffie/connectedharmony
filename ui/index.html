@@ -349,6 +349,7 @@
                 </v-btn>
                 <v-spacer class="mt-4" />
               </template>
+              <div id="reference-container"></div>
               <template v-else v-if="!loadReferenceSuccess">
                 <v-alert type="error" class="my-2" v-if="loadReferenceError">
                   Leider konnte die Begleit-Stimme nicht geladen werden. Du kannst es nochmal mit dem Neuladen der Seite probieren, manche Endgeräte unterstützen aber leider nicht alle nötigen Funktionen für diese Anwendung (z.B. iPhones, alte Edge-Versionen). Bitte probiere es in diesem Fall mit einem anderen Gerät (z.B. PC, Tablet) und dort bevorzugt mit den Browsern Firefox oder Chrome.
@@ -440,7 +441,7 @@
 
               <template v-if="retryVisible">
                 <h2 class="subtitle-1 mt-2">Zufrieden?</h2>
-                <p>Bist du zufrieden mit der Qualität? Einsatz pünktlich? Keine Störgeräusche? Nicht zu laut, nicht zu leise?</p>
+                <p>Bist du zufrieden mit der Qualität? Keine Störgeräusche? Nicht zu laut, nicht zu leise?</p>
                 <p>Wir sind vielleicht nicht alle gewöhnt, unsere eigenen Stimmen aufgenommen zu hören. Deswegen mag Manches ungewohnt klingen. Das ist aber vollkommen okay &ndash; am Ende sind wir alle gemeinsam zu hören.</p>
 
                 <p>Wenn du trotzdem nochmal neu aufnehmen möchtest, kannst du das hier tun:</p>
@@ -522,7 +523,7 @@
   <script type="text/javascript" src="/ui/vue.min.js?version=202005151107"></script>
   <script type="text/javascript" src="/ui/vue-router.min.js?version=202005151107"></script>
   <script type="text/javascript" src="/ui/vuetify.js?version=202005151107"></script>
-  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202005151107"></script>
-  <script type="text/javascript" src="/ui/app.js?version=202005151107"></script>
+  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202011081415"></script>
+  <script type="text/javascript" src="/ui/app.js?version=202011081415"></script>
 </body>
 </html>
