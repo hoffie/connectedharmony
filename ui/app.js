@@ -464,6 +464,8 @@ const Project = {
       var media;
       if (this.project.ReferenceIsVideo) {
         media = document.createElement('video');
+        media.width = this.videoWidth;
+        media.style.maxWidth = '80%';
       } else {
         media = new Audio();
       }
