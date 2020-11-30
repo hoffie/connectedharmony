@@ -29,7 +29,7 @@ const Project = {
       loadReferenceError: false,
       loadReferenceSuccess: false,
       recordedMediaElement: null,
-      delay: 50,
+      delay: 60, // should be divisble by 20 so that it can be reduced to 0 if necessary
       teardownDelay: 2.5, // time to continue recording after reference ended
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
