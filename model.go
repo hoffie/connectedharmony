@@ -26,6 +26,7 @@ type Recording struct {
 	ID                 uint64
 	ProjectID          uint64
 	VoiceID            uint64
+	Voice              Voice
 	CreatedAt          time.Time
 	ParticipantName    string `gorm:"size:25"`
 	ParticipantComment string `gorm:"size:1024"`

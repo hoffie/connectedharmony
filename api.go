@@ -6,13 +6,24 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/jinzhu/gorm"
 )
+
+func sanitizePathname(s string, length int) string {
+	s = badPathCharsRegexp.ReplaceAllString(s, "-")
+	if len(s) > length {
+		s = s[:length]
+	}
+	s = strings.Trim(s, "-")
+	return s
+}
 
 var (
 	audioTypes = []struct {
@@ -30,6 +41,7 @@ var (
 		{".webm", "video/webm"},
 		{".mp4", "video/mp4"},
 	}
+	badPathCharsRegexp = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 )
 
 func saveRecordingMetadata(c *gin.Context) {
@@ -96,6 +108,7 @@ func saveRecordingMetadata(c *gin.Context) {
 func saveRecordingFile(c *gin.Context) {
 	var r Recording
 	q := db.Table("recordings")
+	q = q.Preload("Voice")
 	q = q.Joins("LEFT JOIN projects ON projects.id = recordings.project_id")
 	q = q.Where("projects.key = ?", c.Param("projectKey"))
 	q = q.Where("recordings.id = ?", c.Param("recordingID"))
@@ -117,7 +130,8 @@ func saveRecordingFile(c *gin.Context) {
 		c.AbortWithStatus(500)
 		return
 	}
-	name := fmt.Sprintf("%d-%d", r.VoiceID, r.ID)
+	date := time.Now().Local().Format("20060201")
+	name := fmt.Sprintf("%s_%s_%s_%d", sanitizePathname(r.Voice.Name, 25), sanitizePathname(r.ParticipantName, 25), date, r.ID)
 	w, err := os.Create(filepath.Join(dir, name+".media"))
 	if err != nil {
 		log.Printf("failed to open output file")
