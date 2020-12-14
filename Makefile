@@ -4,7 +4,10 @@ build: *.go
 	gofmt -w *.go
 	go build
 
-debug-run: build
+test:
+	go test
+
+debug-run: test build
 	./connectedharmony -debug
 
 debug-webserver: test/cert.pem

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
@@ -23,6 +25,16 @@ func sanitizePathname(s string, length int) string {
 	}
 	s = strings.Trim(s, "-")
 	return s
+}
+
+func generateToken() string {
+	n := 30
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic("failed to read random bytes")
+	}
+	return base64.URLEncoding.EncodeToString(b)
 }
 
 var (
@@ -84,6 +96,7 @@ func saveRecordingMetadata(c *gin.Context) {
 
 	r := Recording{
 		ProjectID:          p.ID,
+		Token:              generateToken(),
 		VoiceID:            v.ID,
 		ParticipantName:    strings.TrimSpace(m.ParticipantName),
 		ParticipantComment: strings.TrimSpace(m.ParticipantComment),
@@ -100,8 +113,8 @@ func saveRecordingMetadata(c *gin.Context) {
 		return
 	}
 	c.JSON(201, gin.H{
-		"success":     true,
-		"RecordingID": r.ID,
+		"success":        true,
+		"RecordingToken": r.Token,
 	})
 }
 
@@ -111,7 +124,7 @@ func saveRecordingFile(c *gin.Context) {
 	q = q.Preload("Voice")
 	q = q.Joins("LEFT JOIN projects ON projects.id = recordings.project_id")
 	q = q.Where("projects.key = ?", c.Param("projectKey"))
-	q = q.Where("recordings.id = ?", c.Param("recordingID"))
+	q = q.Where("recordings.token = ?", c.Param("recordingToken"))
 	q = q.First(&r)
 	err := q.Error
 	if err == gorm.ErrRecordNotFound {

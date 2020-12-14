@@ -16,3 +16,14 @@ func TestSanitizePathname(t *testing.T) {
 		}
 	}
 }
+
+func TestGenerateToken(t *testing.T) {
+	t1 := generateToken()
+	t2 := generateToken()
+	if t1 == t2 {
+		t.Error("created two identical tokens, something is wrong")
+	}
+	if len(t1) != 40 || len(t2) != 40 {
+		t.Error("unexpected token length")
+	}
+}

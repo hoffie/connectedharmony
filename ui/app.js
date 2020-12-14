@@ -319,7 +319,7 @@ const Project = {
         });
       }.bind(this);
       xhr.responseType = 'json';
-      xhr.open('PUT', '/api/project/' + this.$route.params.project_key + '/recording/' + m.RecordingID);
+      xhr.open('PUT', '/api/project/' + this.$route.params.project_key + '/recording/' + m.RecordingToken);
       xhr.setRequestHeader('Content-Type', 'application/octet-stream');
       xhr.send(this.recordedBlob);
     },

@@ -65,7 +65,7 @@ func main() {
 	router.GET("/p/:projectKey", serveIndex)
 	router.GET("/api/project/:projectKey", getProject)
 	router.POST("/api/project/:projectKey/recording", saveRecordingMetadata)
-	router.PUT("/api/project/:projectKey/recording/:recordingID", saveRecordingFile)
+	router.PUT("/api/project/:projectKey/recording/:recordingToken", saveRecordingFile)
 	router.POST("/api/errors", saveErrorEvent)
 	router.Run(listen)
 }

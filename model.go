@@ -24,6 +24,7 @@ type Project struct {
 
 type Recording struct {
 	ID                 uint64
+	Token              string `gorm:"size:40"`
 	ProjectID          uint64
 	VoiceID            uint64
 	Voice              Voice
