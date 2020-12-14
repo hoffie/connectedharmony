@@ -23,17 +23,18 @@ type Project struct {
 }
 
 type Recording struct {
-	ID              uint64
-	ProjectID       uint64
-	VoiceID         uint64
-	CreatedAt       time.Time
-	ParticipantName string `gorm:"size:25"`
-	OffsetMsec      int64
-	Uploaded        bool
-	UserAgent       string `gorm:"size:512"`
-	HasVideo        bool
-	NumAttempts     int
-	NumErrors       int
+	ID                 uint64
+	ProjectID          uint64
+	VoiceID            uint64
+	CreatedAt          time.Time
+	ParticipantName    string `gorm:"size:25"`
+	ParticipantComment string `gorm:"size:1024"`
+	OffsetMsec         int64
+	Uploaded           bool
+	UserAgent          string `gorm:"size:512"`
+	HasVideo           bool
+	NumAttempts        int
+	NumErrors          int
 }
 
 type Voice struct {

@@ -34,12 +34,13 @@ var (
 
 func saveRecordingMetadata(c *gin.Context) {
 	var m struct {
-		VoiceID         uint64 `binding:"required"`
-		ParticipantName string
-		OffsetMsec      int64
-		HasVideo        bool
-		NumAttempts     int
-		NumErrors       int
+		VoiceID            uint64 `binding:"required"`
+		ParticipantName    string
+		ParticipantComment string
+		OffsetMsec         int64
+		HasVideo           bool
+		NumAttempts        int
+		NumErrors          int
 	}
 	if err := c.BindJSON(&m); err != nil {
 		c.JSON(400, gin.H{"error": "bad metadata"})
@@ -70,14 +71,15 @@ func saveRecordingMetadata(c *gin.Context) {
 	}
 
 	r := Recording{
-		ProjectID:       p.ID,
-		VoiceID:         v.ID,
-		ParticipantName: strings.TrimSpace(m.ParticipantName),
-		OffsetMsec:      m.OffsetMsec,
-		HasVideo:        m.HasVideo,
-		UserAgent:       c.GetHeader("User-Agent"),
-		NumAttempts:     m.NumAttempts,
-		NumErrors:       m.NumErrors,
+		ProjectID:          p.ID,
+		VoiceID:            v.ID,
+		ParticipantName:    strings.TrimSpace(m.ParticipantName),
+		ParticipantComment: strings.TrimSpace(m.ParticipantComment),
+		OffsetMsec:         m.OffsetMsec,
+		HasVideo:           m.HasVideo,
+		UserAgent:          c.GetHeader("User-Agent"),
+		NumAttempts:        m.NumAttempts,
+		NumErrors:          m.NumErrors,
 	}
 	err = db.Save(&r).Error
 	if err != nil {

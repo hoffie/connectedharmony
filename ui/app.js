@@ -44,6 +44,7 @@ const Project = {
       // to be submitted at the end:
       voice: null,
       participantName: '',
+      participantComment: '',
       useVideo: false,
       videoSupported: false,
       numAttempts: 0,
@@ -218,6 +219,7 @@ const Project = {
       var metadata = {
         VoiceID: this.voice.ID,
         ParticipantName: this.participantName,
+        ParticipantComment: this.participantComment,
         OffsetMsec: this.delay,
         HasVideo: this.useVideo,
         NumAttempts: this.numAttempts,
