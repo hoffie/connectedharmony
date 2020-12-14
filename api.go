@@ -53,7 +53,7 @@ func saveRecordingMetadata(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		log.Printf("failed to lookup project", err)
+		log.Printf("failed to lookup project: %v", err)
 		c.AbortWithStatus(500)
 		return
 	}
@@ -65,7 +65,7 @@ func saveRecordingMetadata(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		log.Printf("failed to lookup voice", err)
+		log.Printf("failed to lookup voice: %v", err)
 		c.AbortWithStatus(500)
 		return
 	}
@@ -83,7 +83,7 @@ func saveRecordingMetadata(c *gin.Context) {
 	}
 	err = db.Save(&r).Error
 	if err != nil {
-		log.Printf("failed to save recording metadata", err)
+		log.Printf("failed to save recording metadata: %v", err)
 		c.AbortWithStatus(500)
 		return
 	}
@@ -188,7 +188,7 @@ func getProject(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		log.Printf("failed to lookup project", err)
+		log.Printf("failed to lookup project: %v", err)
 		c.AbortWithStatus(500)
 		return
 	}
@@ -277,7 +277,7 @@ func saveErrorEvent(c *gin.Context) {
 	}
 	err := db.Save(&e).Error
 	if err != nil {
-		log.Printf("failed to error event", err)
+		log.Printf("failed to error event: %v", err)
 		c.AbortWithStatus(500)
 		return
 	}

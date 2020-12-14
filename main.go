@@ -31,7 +31,7 @@ func init() {
 	flag.StringVar(&listen, "listen", "127.0.0.1:3000", "host:port to listen on")
 	flag.BoolVar(&debug, "debug", false, "whether to enable debugging features")
 	if err := os.MkdirAll(dataPath, 0o700); err != nil {
-		log.Printf("failed to create data dir", err)
+		log.Printf("failed to create data dir: %v", err)
 	}
 }
 
