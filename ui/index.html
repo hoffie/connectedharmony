@@ -490,7 +490,7 @@
               <p>Hinweis: Dies wird je nach Internetanbindung einige Sekunden bis Minuten dauern und benötigt einige Megabyte an Datenvolumen.</p>
               <p>Bitte gib nun noch deinen Namen ein (wenn du das nicht möchtest, kannst du das Feld auch frei lassen).</p>
               <v-text-field v-model="participantName" label="Dein Name" />
-              <v-text-field v-model="participantComment" label="Nachricht (optional, z.B. &quot;bitte nur Ton aus der ersten Strophe verwenden&quot;)" />
+              <v-text-field v-model="participantComment" label="optionale Nachricht (z.B. &quot;zweite Version&quot; oder &quot;bitte nur Ton aus der ersten Strophe verwenden&quot;)" />
               <div>
                 <v-btn @click="upload" color="primary" :disabled="uploading" :loading="uploading">
                   Speichern
