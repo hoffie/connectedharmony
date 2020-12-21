@@ -143,7 +143,7 @@ func saveRecordingFile(c *gin.Context) {
 		c.AbortWithStatus(500)
 		return
 	}
-	date := time.Now().Local().Format("20060201")
+	date := time.Now().Local().Format("20060102")
 	name := fmt.Sprintf("%s_%s_%s_%d", sanitizePathname(r.Voice.Name, 25), sanitizePathname(r.ParticipantName, 25), date, r.ID)
 	w, err := os.Create(filepath.Join(dir, name+".media"))
 	if err != nil {
