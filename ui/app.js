@@ -442,12 +442,12 @@ const Project = {
       window.setTimeout(checkMedia, 60000);
     },
     onReferenceReady: function() {
-      this.referenceMediaElement.oncanplaythrough = null;
+      this.referenceMediaElement.onplay = null;
+      if (this.project.ReferenceIsVideo) {
+        this.referenceMediaElement.style.visibility = 'visible'; // was hidden during preload
+      }
+      this.referenceMediaElement.muted = false; // was muted during preload
       if (this.loadReferenceSuccess) return;
-      this.referenceGain = this.audioContext.createGain();
-      this.referenceGain.connect(this.audioContext.destination);
-      this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
-      this.referenceSource.connect(this.referenceGain);
       this.loadReferenceSuccess = true;
     },
     loadReference: function() {
@@ -468,12 +468,20 @@ const Project = {
         media = document.createElement('video');
         media.width = this.videoWidth;
         media.style.maxWidth = '80%';
+        media.style.visibility = 'hidden'; // hide during preload
       } else {
         media = new Audio();
       }
-      this.referenceMediaElement = media;
+      media.muted = true; // mute during preload
       media.preload = 'auto';
-      media.oncanplaythrough = this.onReferenceReady;
+
+      this.referenceMediaElement = media;
+      this.referenceGain = this.audioContext.createGain();
+      this.referenceGain.connect(this.audioContext.destination);
+      this.referenceSource = this.audioContext.createMediaElementSource(this.referenceMediaElement);
+      this.referenceSource.connect(this.referenceGain);
+
+      media.onplay = this.onReferenceReady;
       media.onerror = function(e) {
         console.log("loadReference failed:", e);
         sendErrorEvent({
@@ -493,14 +501,19 @@ const Project = {
         s.type = ref.Type;
         media.appendChild(s);
       }
+
+      // we force all browsers (even safari) to start buffering by
+      // starting to play silently:
+      this.playReference(0 /* wait */, 0 /* gain */, function() {});
+
       // As another fallback, we just accept a partially loaded reference file
       // after some time:
       window.setTimeout(function() {
-        if (this.loadReferenceSuccess) return; // oncanplaythrough fired already
+        if (this.loadReferenceSuccess) return; // onplay fired already
         var e = new Error();
         sendErrorEvent({
           Source: 'app.js:loadReference:fallback',
-          Message: 'canplaythrough did not fire within 3 sec',
+          Message: 'play did not fire within 3 sec',
           URI: e.fileName,
           Line: e.lineNumber,
           Column: e.columnNumber,
