@@ -666,7 +666,7 @@ const app = new Vue({
       if (!window.MediaStreamRecorder || !window.AudioContext) {
         return true;
       }
-      if (/Presto|Edge\/|Trident|iPhone|iPad|Macintosh.*Version\/|FxiOS/.test(window.navigator.userAgent)) {
+      if (/Presto|Edge\/|Trident|FxiOS/.test(window.navigator.userAgent)) {
         return true;
       }
       return false;
