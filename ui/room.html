@@ -1,0 +1,138 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" type="text/css" href="/ui/materialdesignicons.min.css?version=202005151107">
+  <link rel="stylesheet" type="text/css" href="/ui/vuetify.min.css?version=202005151107">
+  <link rel="stylesheet" type="text/css" href="/ui/fonts.css?version=202005151107">
+  <title>ConnectedHarmony</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="text/x-template" id="app-template">
+    <v-app>
+      <v-content>
+        <v-container fluid>
+          <v-row align="center" justify="center">
+            <v-col cols="12" xl="8" lg="10">
+              <v-card class="elevation-12">
+                <v-toolbar color="primary" dark flat>
+                  <v-toolbar-title>
+                    <v-icon dark>mdi-music</v-icon>
+                    {{ ensemble }}
+                  </v-toolbar-title>
+                  <v-spacer />
+
+                  <v-icon small dark @click.stop="aboutDialog = true" style="cursor: pointer">mdi-google-circles-extended</v-icon>
+                  <div class="ml-1 caption font-weight-thin" style="line-height: 80%; text-align: right; cursor: pointer;" @click.stop="aboutDialog = true">
+                    <div>Connected</div>
+                    <div>Harmony</div>
+                  </div>
+
+                  <v-dialog v-model="supportDialog" width="700">
+                    <v-card>
+                      <v-card-title primary-title>
+                        Unterstützte Geräte
+                      </v-card-title>
+                      <v-divider />
+
+                      <v-card-text class="pt-2">
+                        <p>Diese Web-Anwendung verwendet moderne Browser-Technologien zur Aufnahme von Bild und Ton. <strong color="error">Leider scheint dein Browser die nötigen Standards dafür noch nicht zu unterstützen.</strong></p>
+                        <p>Als gut unterstützt gelten:
+                        <ul>
+                          <li>Windows/Linux/Mac mit aktuellem Firefox, Chrome oder Opera</li>
+                          <li>Android-Smartphones oder -Tablets mit Firefox oder Chrome als Browser
+                          <li>Android ab Version 9 mit dem Standard-Browser</li>
+                        </ul>
+                        </p>
+                        <p>Folgende Browser/Geräte unterstützen leider die nötigen Funktionen nicht (Stand 2020):
+                        <ul>
+                          <li>iPhones &amp; iPads<br />Dem dort verwendeten Safari-Browser fehlen die nötigen Aufnahmefunktionen. Es gibt auf diesen Geräten auch keine echten alternativen Browser. Auch die dort erhältlichen Firefox- und Chrome-Apps dürfen aufgrund von Apple-Vorgaben intern nur die Technik von Apple nutzen. Daher gibt es dort die gleichen Einschränkungen. Eventuell rüstet Apple mit den nächsten iOS-Updates die nötigen Funktionen nach.</li>
+                          <li>Macs mit Safari<br />Hier fehlen ebenfalls die nötigen Funktionen. Chome oder Firefox sollten dort aber funktionieren.</li>
+                          <li>Windows-Standard-Browser Microsoft Edge<br />Der alte Edge bis Version 44 unterstützt die Funktionen nicht. Der neue Edge ab Version 79 sollte alle nötigen Funktionen unterstützen. Diese Version wird seit Ende Februar von Microsoft verteilt, scheint aber auf vielen Geräten noch nicht angekommen zu sein. Eventuell hilft ein Update (manuelles Windows Update) oder ein <a href="https://www.microsoft.com/de-de/edge">händischer Download bei Microsoft</a>.
+                          </li>
+                        </ul>
+                      </v-card-text>
+
+                      <v-divider />
+
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="primary" text @click="supportDialog = false">
+                        Trotzdem versuchen
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                  <v-dialog v-model="aboutDialog" width="500">
+                    <v-card>
+                      <v-card-title primary-title>
+                        Über ConnectedHarmony
+                      </v-card-title>
+                      <v-divider />
+
+                      <v-card-text class="pt-2">
+                        <p>ConnectedHarmony ist ein Projekt von <a href="https://hoffmann-christian.info/">Christian Hoffmann</a>. Der Quellcode ist <a href="https://github.com/hoffie/connectedharmony">frei auf Github verfügbar</a>.</p>
+                        <p>ConnectedHarmony basiert auf diversen Open-Source-Komponenten, ohne die die Umsetzung nicht möglich gewesen wäre:</p>
+                        <ul>
+                          <li>Backend<ul>
+                            <li><a href="https://golang.org">Go</a> für die Applikations-Logik</li>
+                            <li><a href="https://github.com/gin-gonic/gin">Gin</a> als Web-Framework</li>
+                            <li><a href="https://github.com/jinzhu/gorm">gorm</a> als Datenbank-Abstraktion</li>
+                            <li><a href="https://sqlite.org">SQLite</a> als Datenbank</li>
+                          </ul></li>
+                          <li>Frontend<ul>
+                            <li><a href="https://vuejs.org">Vue</a> als reaktives JavaScript-Framework</li>
+                            <li><a href="https://router.vuejs.org">Vue-Router</a> als Request-Routing-Komponente</li>
+                            <li><a href="https://vuetifyjs.com/">Vuetify</a> für die Design-Komponenten</li>
+                            <li><a href="https://github.com/muaz-khan/RecordRTC/">RecordRTC</a> für Medien-Aufnahmen</li>
+                            <li><a href="https://fonts.google.com/">Google-Fonts</a> Roboto &amp; Material</li>
+                          </ul></li>
+                        </ul>
+
+                      </v-card-text>
+
+                      <v-divider />
+
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="primary" text @click="aboutDialog = false">
+                        Schließen
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+
+                </v-toolbar>
+                <v-card-text>
+                  <router-view @ensemble-update="setEnsemble"></router-view>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-content>
+    </v-app>
+  </script>
+
+  <script type="text/x-template" id="room-template">
+    <div>
+    foo
+      <v-text-field v-model="participantName" label="Dein Name" />
+      <div>
+        <v-btn @click="join" color="primary" :disabled="joining" :loading="joining">
+          Beitreten
+          <v-icon small right dark>mdi-arrow-right</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/javascript" src="/ui/errorhandler.js"></script>
+  <script type="text/javascript" src="/ui/vue.min.js?version=202005151107"></script>
+  <script type="text/javascript" src="/ui/vue-router.min.js?version=202005151107"></script>
+  <script type="text/javascript" src="/ui/vuetify.js?version=202005151107"></script>
+  <script type="text/javascript" src="/ui/RecordRTC.min.js?version=202011081415"></script>
+  <script type="text/javascript" src="/ui/room.js?version=202011131527"></script>
+</body>
+</html>

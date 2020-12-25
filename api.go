@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hoffie/connectedharmony/lib"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/jinzhu/gorm"
@@ -54,6 +56,7 @@ var (
 		{".mp4", "video/mp4"},
 	}
 	badPathCharsRegexp = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+	id                 = 0
 )
 
 func saveRecordingMetadata(c *gin.Context) {
@@ -311,5 +314,34 @@ func saveErrorEvent(c *gin.Context) {
 	c.JSON(201, gin.H{
 		"success":      true,
 		"ErrorEventID": e.ID,
+	})
+}
+
+func processRoomUserRecording(c *gin.Context) {
+	pcm, err := lib.PcmFromOpusReader(c.Request.Body)
+	if err != nil {
+		panic(fmt.Sprintf("failed to decode opus: %v", err))
+	}
+	c.Request.Body.Close()
+	mixer.GetChannel(c.Param("userToken")).PushPCM(pcm)
+	c.JSON(200, gin.H{"success": true})
+}
+
+func getRoomUserStream(c *gin.Context) {
+	idx, err := strconv.ParseUint(c.Param("idx"), 10, 64)
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	c.Header("Content-Type", "audio/ogg")
+	c.Stream(func(w io.Writer) bool {
+		bytes, err := opusChunkRecorder.GetChunk(idx)
+		if err != nil {
+			log.Printf("cannot get chunk %d", idx)
+			return false
+		}
+		w.Write(bytes)
+		return false
 	})
 }

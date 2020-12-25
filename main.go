@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hoffie/connectedharmony/lib"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/jinzhu/gorm"
@@ -23,6 +25,9 @@ var uiPath string
 var dataPath string
 var listen string
 var debug bool
+
+var mixer *lib.Mixer
+var opusChunkRecorder *lib.OpusChunkRecorder
 
 func init() {
 	flag.StringVar(&staticPath, "staticPath", "./static", "path to the directory containing static files")
@@ -54,18 +59,36 @@ func main() {
 	db.AutoMigrate(&Voice{})
 	db.AutoMigrate(&ErrorEvent{})
 
+	// FIXME: create per-room-user combination
+	mixer = lib.NewMixer()
+	o, err := os.Create("/tmp/recording.pcm")
+	if err != nil {
+		panic(err)
+	}
+	pcmr := &lib.PCMRecorder{
+		Output: o,
+	}
+	mixer.AddOutput(pcmr)
+	opusChunkRecorder = lib.NewOpusChunkRecorder()
+	mixer.AddOutput(opusChunkRecorder)
+	go mixer.Produce()
+
 	router = gin.Default()
 	if debug {
 		pprof.Register(router)
 	}
 
 	router.StaticFile("/", filepath.Join(uiPath, "index.html"))
+	router.StaticFile("/r", filepath.Join(uiPath, "room.html"))
 	router.Static("/ui", uiPath)
 	router.Static("/static", staticPath)
 	router.GET("/p/:projectKey", serveIndex)
+	router.GET("/r/:roomKey", serveRoom)
 	router.GET("/api/project/:projectKey", getProject)
 	router.POST("/api/project/:projectKey/recording", saveRecordingMetadata)
 	router.PUT("/api/project/:projectKey/recording/:recordingToken", saveRecordingFile)
+	router.POST("/api/rooms/:roomKey/user/:userToken/stream", processRoomUserRecording)
+	router.GET("/api/rooms/:roomKey/user/:userToken/mix/:idx", getRoomUserStream)
 	router.POST("/api/errors", saveErrorEvent)
 	router.Run(listen)
 }
@@ -73,5 +96,10 @@ func main() {
 func serveIndex(c *gin.Context) {
 	c.Request.URL.Path = "/"
 	log.Printf("User Agent %s", c.GetHeader("User-Agent"))
+	router.HandleContext(c)
+}
+
+func serveRoom(c *gin.Context) {
+	c.Request.URL.Path = "/r"
 	router.HandleContext(c)
 }

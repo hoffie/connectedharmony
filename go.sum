@@ -30,6 +30,12 @@ github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5y
 github.com/golang/protobuf v1.3.3 h1:gyjaxf+svBWX08ZjK86iN9geUJF0H6gp2IRKX6Nf6/I=
 github.com/golang/protobuf v1.3.3/go.mod h1:vzj43D7+SQXF/4pzW/hwtAqwc6iTitCiVSaWz5lYuqw=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
+github.com/hoffie/gosndfile v0.0.0-20171006180803-e0c9ef895ee2 h1:ED92tvisk2c8JpEzrIrtIxl7mZCTboOrjxzP1OEo7BI=
+github.com/hoffie/gosndfile v0.0.0-20171006180803-e0c9ef895ee2/go.mod h1:9W8pjqr+WJh8GYAG3VHOinFn3lGTsHgsOgDy0ZhX/4o=
+github.com/hoffie/gosndfile v0.0.0-20201225225151-d3dcf8a1225a h1:ziGtDAzPpxeJxp97U4XHt59iFJbua6ZFy6zxS8D8GwQ=
+github.com/hoffie/gosndfile v0.0.0-20201225225151-d3dcf8a1225a/go.mod h1:9W8pjqr+WJh8GYAG3VHOinFn3lGTsHgsOgDy0ZhX/4o=
+github.com/hraban/opus v0.0.0-20201025103112-d779bb1cc5a2 h1:Br/jzv+7tTaFI6z2kwI8qmn0GvVnp2oHC6x/2XE0kyY=
+github.com/hraban/opus v0.0.0-20201025103112-d779bb1cc5a2/go.mod h1:YQQXrWHN3JEvCtw5ImyTCcPeU/ZLo/YMA+TpB64XdrU=
 github.com/jinzhu/gorm v1.9.12 h1:Drgk1clyWT9t9ERbzHza6Mj/8FY/CqMyVzOiHviMo6Q=
 github.com/jinzhu/gorm v1.9.12/go.mod h1:vhTjlKSJUTWNtcbQtrMBFCxy7eXTzeCAzfL5fBZT/Qs=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
