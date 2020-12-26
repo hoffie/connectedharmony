@@ -7,7 +7,8 @@ import (
 )
 
 const sampleRate = 48000
-const oneSecondInSamples = sampleRate * 1
+const tickIntervalMs = 200 // ms
+const oneIntervalInSamples = sampleRate * 0.2
 
 type AudioSink interface {
 	PushPCM(pcm []int16)
@@ -50,11 +51,11 @@ func (m *Mixer) AddOutput(o AudioSink) {
 }
 
 func (m *Mixer) Produce() {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(tickIntervalMs * time.Millisecond)
 	for range ticker.C {
-		var pcm [oneSecondInSamples]int16
+		var pcm [oneIntervalInSamples]int16
 		for _, channel := range m.channels {
-			channelPCM := channel.PullOneSecond()
+			channelPCM := channel.PullOneInterval()
 			addToMix(&pcm, channelPCM)
 		}
 		for _, output := range m.outputs {
@@ -63,7 +64,7 @@ func (m *Mixer) Produce() {
 	}
 }
 
-func addToMix(base *[oneSecondInSamples]int16, add [oneSecondInSamples]int16) {
+func addToMix(base *[oneIntervalInSamples]int16, add [oneIntervalInSamples]int16) {
 	if len(base) != len(add) {
 		panic("can only mix same-length data")
 	}
@@ -77,20 +78,20 @@ func (mc *MixerChannel) PushPCM(pcm []int16) {
 	mc.bufferMtx.Lock()
 	defer mc.bufferMtx.Unlock()
 	mc.buffer = append(mc.buffer, pcm...)
-	if len(mc.buffer) > oneSecondInSamples*3 {
+	if len(mc.buffer) > oneIntervalInSamples*3 {
 		log.Printf("FIXME buffer getting too large")
 	}
 }
 
-func (mc *MixerChannel) PullOneSecond() [oneSecondInSamples]int16 {
+func (mc *MixerChannel) PullOneInterval() [oneIntervalInSamples]int16 {
 	mc.bufferMtx.Lock()
 	defer mc.bufferMtx.Unlock()
-	var ret [oneSecondInSamples]int16
+	var ret [oneIntervalInSamples]int16
 	copy(ret[:], mc.buffer)
-	if len(mc.buffer) < oneSecondInSamples {
+	if len(mc.buffer) < oneIntervalInSamples {
 		print("FIXME buffer underflow")
 		return ret
 	}
-	mc.buffer = mc.buffer[oneSecondInSamples:]
+	mc.buffer = mc.buffer[oneIntervalInSamples:]
 	return ret
 }

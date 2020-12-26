@@ -335,13 +335,10 @@ func getRoomUserStream(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "audio/ogg")
-	c.Stream(func(w io.Writer) bool {
-		bytes, err := opusChunkRecorder.GetChunk(idx)
-		if err != nil {
-			log.Printf("cannot get chunk %d", idx)
-			return false
-		}
-		w.Write(bytes)
-		return false
-	})
+	bytes, err := opusChunkRecorder.GetChunk(idx)
+	if err != nil {
+		log.Printf("cannot get chunk %d", idx)
+		return
+	}
+	c.Writer.Write(bytes)
 }

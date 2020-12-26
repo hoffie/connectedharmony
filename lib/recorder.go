@@ -2,12 +2,13 @@ package lib
 
 import (
 	"io"
+	"io/ioutil"
 	"sync"
 	"errors"
 	"time"
 	"log"
 
-	"github.com/hraban/opus"
+	"github.com/hoffie/gosndfile/sndfile"
 )
 
 type PCMRecorder struct {
@@ -16,11 +17,26 @@ type PCMRecorder struct {
 
 func (rr *PCMRecorder) PushPCM(pcm []int16) {
 	for _, sample := range pcm {
-		b := make([]byte, 2)
-		b[0] = byte(sample & 0xff)
-		b[1] = byte(sample >> 8)
+		b := sampleToBytes(sample)
 		rr.Output.Write(b)
 	}
+}
+
+func sampleToBytes(i int16) []byte {
+	b := make([]byte, 2)
+	b[0] = byte(i & 0xff)
+	b[1] = byte(i >> 8)
+	return b
+}
+
+func samplesToBytes(s []int16) []byte {
+	r := make([]byte, len(s)*2)
+	for i, t := range s {
+		b := sampleToBytes(t)
+		r[i*2] = b[0]
+		r[i*2+1] = b[1]
+	}
+	return r
 }
 
 type OpusChunkRecorder struct {
@@ -28,9 +44,6 @@ type OpusChunkRecorder struct {
 	bufferMtx              sync.Mutex
 	currentChunkIdx        uint64
 	chunks                 map[uint64][]byte
-	currentChunk           []byte
-	currentChunkFrameCount int
-	enc                    *opus.Encoder
 	pcm                    []int16
 }
 
@@ -38,24 +51,7 @@ func NewOpusChunkRecorder() *OpusChunkRecorder {
 	ocr := &OpusChunkRecorder{
 		chunks: make(map[uint64][]byte),
 	}
-	ocr.newEncoder()
 	return ocr
-}
-
-func (ocr *OpusChunkRecorder) newEncoder() {
-	// Is called before first use and when creating a fresh chunk
-	const channels = 1 // mono; 2 for stereo
-
-	enc, err := opus.NewEncoder(sampleRate, channels, opus.AppAudio)
-	if err != nil {
-		panic("opus encoder creation failed")
-	}
-	const opusBitrate = 128000
-	err = enc.SetBitrate(opusBitrate)
-	if err != nil {
-		panic("failed to set opus bitrate")
-	}
-	ocr.enc = enc
 }
 
 func (ocr *OpusChunkRecorder) PushPCM(pcm []int16) {
@@ -64,43 +60,27 @@ func (ocr *OpusChunkRecorder) PushPCM(pcm []int16) {
 }
 
 func (ocr *OpusChunkRecorder) encode() {
-	const bufferSize = 1000 // choose any buffer size you like. 1k is plenty.
-	const frameSize = 40    // valid: 2.5, 5, 10, 20, 40, 60
-	const samplesPerFrame = sampleRate / 1000 * frameSize
+	const chunkSize = sampleRate / 5 // 0.2s
 	ocr.bufferMtx.Lock()
 	defer ocr.bufferMtx.Unlock()
-	for len(ocr.pcm) > samplesPerFrame {
-		frame := ocr.pcm[0:samplesPerFrame]
-		ocr.pcm = ocr.pcm[samplesPerFrame:]
-		data := make([]byte, bufferSize)
-		n, err := ocr.enc.Encode(frame, data)
-		if err != nil {
-			panic("opus encoding failed")
-		}
-		data = data[:n]
-		ocr.handleFrame(data)
+	var pcmChunk []int16
+	for len(ocr.pcm) >= chunkSize {
+		pcmChunk = ocr.pcm[:chunkSize]
+		ocr.pcm = ocr.pcm[chunkSize:]
+		ocr.handleChunk(pcmChunk)
 	}
 }
 
-func (ocr *OpusChunkRecorder) handleFrame(data []byte) {
+func (ocr *OpusChunkRecorder) handleChunk(pcmChunk []int16) {
 	// may only be called from encode() which holds the buffer lock
 	const keepChunks = 1000
-	const framesPerChunk = 25 // * frameSize=40ms -> 1s chunks
-	ocr.currentChunk = append(ocr.currentChunk, data...)
-	ocr.currentChunkFrameCount++
-	if ocr.currentChunkFrameCount < framesPerChunk {
-		return
-	}
 	log.Printf("finishing chunk %d", ocr.currentChunkIdx)
-	ocr.chunks[ocr.currentChunkIdx] = ocr.currentChunk
+	ocr.chunks[ocr.currentChunkIdx] = pcmToOggOpus(pcmChunk)
 	ocr.currentChunkIdx++
-	ocr.currentChunkFrameCount = 0
-	ocr.currentChunk = []byte{}
 	if ocr.currentChunkIdx >= keepChunks {
 		log.Printf("deleting old chunk %d", ocr.currentChunkIdx-keepChunks)
 		delete(ocr.chunks, ocr.currentChunkIdx-keepChunks)
 	}
-	ocr.newEncoder()
 }
 
 func (ocr *OpusChunkRecorder) GetChunk(idx uint64) ([]byte, error) {
@@ -117,4 +97,51 @@ func (ocr *OpusChunkRecorder) GetChunk(idx uint64) ([]byte, error) {
 		}
 	}
 	return c, nil
+}
+
+func pcmToOggOpus(pcm []int16) []byte {
+	var ii sndfile.Info
+	ii.Format = sndfile.SF_FORMAT_RAW | sndfile.SF_FORMAT_PCM_16
+	ii.Channels = 1
+	ii.Samplerate = sampleRate
+	fd, err := memfile("source", samplesToBytes(pcm))
+	if err != nil {
+		panic(err)
+	}
+	in, err := sndfile.OpenFd(uintptr(fd), sndfile.Read, &ii, true)
+	if err != nil {
+		panic(err)
+	}
+	defer in.Close()
+
+	var oi sndfile.Info
+	oi.Format = sndfile.SF_FORMAT_OGG | sndfile.SF_FORMAT_OPUS
+	oi.Channels = 1
+	oi.Samplerate = sampleRate
+	out, err := sndfile.Open("/tmp/foo.ogg", sndfile.Write, &oi)
+	if err != nil {
+		panic(err)
+	}
+
+	buf := make([]int32, 1024)
+	for {
+		r, err := in.ReadItems(buf)
+		if err != nil {
+			panic(err)
+		}
+		if r == 0 {
+			break
+		}
+		buf = buf[:r]
+		_, err = out.WriteItems(buf)
+		if err != nil {
+			panic(err)
+		}
+	}
+	out.Close() // must be done before reading the output again
+	c, err := ioutil.ReadFile("/tmp/foo.ogg")
+	if err != nil {
+		panic(err)
+	}
+	return c
 }

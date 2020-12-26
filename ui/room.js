@@ -4,7 +4,7 @@ const Room = {
     return {
       joining: false,
       participantName: '',
-      streamPosition: 20,
+      streamPosition: 30,
     };
   },
   methods: {
@@ -19,26 +19,28 @@ const Room = {
       request.open('GET', '/api/rooms/' + this.$route.params.room_key + '/user/mytoken/mix/' + this.streamPosition, true); // this request blocks until available
 
       request.responseType = 'arraybuffer';
-      console.log(request);
       request.onload = function() {
         var audioData = request.response;
         this.audioContext.decodeAudioData(audioData,
           function(buffer) {
             source.buffer = buffer;
             source.connect(this.audioContext.destination);
-            if (this.streamPosition == 0) {
+            var localTimeBudget = 0.150; // s
+            var chunkLength = 0.2; // s
+            var tmp = request.responseURL.split("/");
+            var streamPosition = parseInt(tmp[tmp.length-1]);
+            if (!this.streamStartTime) {
               this.streamStartTime = this.audioContext.currentTime;
             }
-            var localTimeBudget = 150; // ms
-            var chunkLength = 200; // ms
-            var tmp = request.responseURL.split("/");
-            var streamPosition = parseInt(tmp[tmp.length]);
-            source.start(this.streamStartTime + localTimeBudget + streamPosition * chunkLength);
+            if (!this.firstStreamPosition) {
+              this.firstStreamPosition = streamPosition;
+            }
+            source.start(this.streamStartTime + localTimeBudget + (streamPosition - this.firstStreamPosition) * chunkLength);
           }.bind(this),
           function(e){ console.log("Error with decoding audio data: " + e);
-          this.streamPosition += 1;
-          //return this.scheduleNextChunkPlayback();
         }.bind(this));
+        this.streamPosition += 1;
+        return this.scheduleNextChunkPlayback();
       }.bind(this);
       request.send();
     },
@@ -52,12 +54,14 @@ const Room = {
         },
       };
       var supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-      console.log(supportedConstraints);
       if (supportedConstraints.autoGainControl) {
         constraints.audio.autoGainControl = false;
       }
       if (supportedConstraints.noiseSuppression) {
         constraints.audio.noiseSuppression = false;
+      }
+      if (supportedConstraints.echoCancellation) {
+        constraints.audio.echoCancellation = false;
       }
       console.log("using constaints:", constraints);
       navigator.mediaDevices.getUserMedia(constraints)
@@ -72,7 +76,7 @@ const Room = {
         type: 'audio',
         audioBitsPerSecond: 128*1000,
         ondataavailable: this.uploadChunk,
-        timeSlice: 1000,
+        timeSlice: 200,
       }
       this.recordRTC = RecordRTC(this.mediaStream, config);
       console.log(this.recordRTC);
@@ -85,7 +89,7 @@ const Room = {
       xhr.onload = function() {
         var uploadDuration = window.performance.now() - uploadStarted;
         // FIXME only log long durations / add metric
-        console.log("upload took " + uploadDuration + " ms");
+        //console.log("upload took " + uploadDuration + " ms");
         if (xhr.status == 200) {
           this.uploaded = true;
           return;
