@@ -79,31 +79,23 @@ const Room = {
         timeSlice: 200,
       }
       this.recordRTC = RecordRTC(this.mediaStream, config);
-      console.log(this.recordRTC);
+
+      // FIXME 2020-01-05
+      // FIXME wss support
+      this.streamWs = new WebSocket('ws://' + window.location.host + '/api/rooms/FIXME/websocket')
+      this.streamWs.onerror = function() {
+        console.log("uploadRecording: Upload error (unsuccessful return code)", xhr);
+        var e = new Error();
+      };
+      this.streamWs.onmessage = function(msg) {
+        //FIXME handle incoming audio
+      };
+      // FIXME 2020-01-05
+
       this.recordRTC.startRecording();
     },
     uploadChunk: function(blob) {
-      var uploadStarted = window.performance.now();
-      // We have to use XHR because fetch() doesn't support upload progress in 2020.
-      var xhr = new XMLHttpRequest();
-      xhr.onload = function() {
-        var uploadDuration = window.performance.now() - uploadStarted;
-        // FIXME only log long durations / add metric
-        //console.log("upload took " + uploadDuration + " ms");
-        if (xhr.status == 200) {
-          this.uploaded = true;
-          return;
-        }
-        console.log("uploadRecording: Upload error (unsuccessful return code)", xhr);
-        var e = new Error();
-      }.bind(this);
-      xhr.onerror = function(e) {
-        // FIXME handle error
-      }.bind(this);
-      xhr.responseType = 'json';
-      xhr.open('POST', '/api/rooms/' + this.$route.params.room_key + '/user/mytoken/stream');
-      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-      xhr.send(blob);
+      this.streamWs.send(blob);
       // clean up to avoid memory leaks:
       this.recordRTC.getInternalRecorder().getArrayOfBlobs().splice(0)
     },

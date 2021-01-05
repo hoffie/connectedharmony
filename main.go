@@ -9,6 +9,7 @@ import (
 	"github.com/hoffie/connectedharmony/lib"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/olahol/melody.v1"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -78,6 +79,14 @@ func main() {
 		pprof.Register(router)
 	}
 
+	ws := melody.New()
+	router.GET("/api/rooms/:roomKey/websocket", func(c *gin.Context) {
+		ws.HandleRequest(c.Writer, c.Request)
+	})
+	ws.HandleMessage(func(s *melody.Session, msg []byte) {
+		processRoomUserRecording(msg)
+	})
+
 	router.StaticFile("/", filepath.Join(uiPath, "index.html"))
 	router.StaticFile("/r", filepath.Join(uiPath, "room.html"))
 	router.Static("/ui", uiPath)
@@ -87,7 +96,6 @@ func main() {
 	router.GET("/api/project/:projectKey", getProject)
 	router.POST("/api/project/:projectKey/recording", saveRecordingMetadata)
 	router.PUT("/api/project/:projectKey/recording/:recordingToken", saveRecordingFile)
-	router.POST("/api/rooms/:roomKey/user/:userToken/stream", processRoomUserRecording)
 	router.GET("/api/rooms/:roomKey/user/:userToken/mix/:idx", getRoomUserStream)
 	router.POST("/api/errors", saveErrorEvent)
 	router.Run(listen)

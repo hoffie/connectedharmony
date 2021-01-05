@@ -317,7 +317,8 @@ func saveErrorEvent(c *gin.Context) {
 	})
 }
 
-func processRoomUserRecording(c *gin.Context) {
+func processRoomUserRecording(msg []byte) {
+	b := bytes.Buffer{msg}
 	pcm, err := lib.PcmFromOpusReader(c.Request.Body)
 	if err != nil {
 		panic(fmt.Sprintf("failed to decode opus: %v", err))
