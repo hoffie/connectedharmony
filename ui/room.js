@@ -94,8 +94,6 @@ const Room = {
       }.bind(this));
     },
     uploadChunk: function(event) {
-      // Firefox records in Blobs, but doesn't support them in
-      // WebSocket.send; therefore, we have to convert to an arraybuffer...
       this.streamWs.send(event.data);
     },
   },
