@@ -4,8 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"sync"
-	"errors"
-	"time"
 	"log"
 
 	"github.com/hoffie/gosndfile/sndfile"
@@ -39,64 +37,49 @@ func samplesToBytes(s []int16) []byte {
 	return r
 }
 
-type OpusChunkRecorder struct {
+type OpusChunkStreamer struct {
 	buffer                 []int16
 	bufferMtx              sync.Mutex
-	currentChunkIdx        uint64
-	chunks                 map[uint64][]byte
+	stream Streamer
 	pcm                    []int16
 }
 
-func NewOpusChunkRecorder() *OpusChunkRecorder {
-	ocr := &OpusChunkRecorder{
-		chunks: make(map[uint64][]byte),
+type Streamer interface {
+	WriteBinary(msg []byte) error
+}
+
+func NewOpusChunkStreamer(stream Streamer) *OpusChunkStreamer {
+	ocs := &OpusChunkStreamer{
+		stream: stream,
 	}
-	return ocr
+	return ocs
 }
 
-func (ocr *OpusChunkRecorder) PushPCM(pcm []int16) {
-	ocr.pcm = append(ocr.pcm, pcm...)
-	ocr.encode()
+func (ocs *OpusChunkStreamer) PushPCM(pcm []int16) {
+	ocs.pcm = append(ocs.pcm, pcm...)
+	ocs.encode()
 }
 
-func (ocr *OpusChunkRecorder) encode() {
+func (ocs *OpusChunkStreamer) encode() {
 	const chunkSize = sampleRate / 5 // 0.2s
-	ocr.bufferMtx.Lock()
-	defer ocr.bufferMtx.Unlock()
+	ocs.bufferMtx.Lock()
+	defer ocs.bufferMtx.Unlock()
 	var pcmChunk []int16
-	for len(ocr.pcm) >= chunkSize {
-		pcmChunk = ocr.pcm[:chunkSize]
-		ocr.pcm = ocr.pcm[chunkSize:]
-		ocr.handleChunk(pcmChunk)
+	for len(ocs.pcm) >= chunkSize {
+		pcmChunk = ocs.pcm[:chunkSize]
+		ocs.pcm = ocs.pcm[chunkSize:]
+		ocs.handleChunk(pcmChunk)
 	}
 }
 
-func (ocr *OpusChunkRecorder) handleChunk(pcmChunk []int16) {
+func (ocs *OpusChunkStreamer) handleChunk(pcmChunk []int16) {
 	// may only be called from encode() which holds the buffer lock
-	const keepChunks = 1000
-	log.Printf("finishing chunk %d", ocr.currentChunkIdx)
-	ocr.chunks[ocr.currentChunkIdx] = pcmToOggOpus(pcmChunk)
-	ocr.currentChunkIdx++
-	if ocr.currentChunkIdx >= keepChunks {
-		log.Printf("deleting old chunk %d", ocr.currentChunkIdx-keepChunks)
-		delete(ocr.chunks, ocr.currentChunkIdx-keepChunks)
+	chunk := pcmToOggOpus(pcmChunk)
+	err := ocs.stream.WriteBinary(chunk)
+	if err != nil {
+		log.Printf("err=%v", err)
+		log.Printf("FIXME cannot write to stream")
 	}
-}
-
-func (ocr *OpusChunkRecorder) GetChunk(idx uint64) ([]byte, error) {
-	ok := false
-	var c []byte
-	for !ok {
-		c, ok = ocr.chunks[idx]
-		if !ok {
-			if idx < ocr.currentChunkIdx {
-				return []byte{}, errors.New("no such chunk")
-			}
-			// FIXME: use channel which unblocks on handleFrame()
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
-	return c, nil
 }
 
 func pcmToOggOpus(pcm []int16) []byte {
@@ -118,6 +101,7 @@ func pcmToOggOpus(pcm []int16) []byte {
 	oi.Format = sndfile.SF_FORMAT_OGG | sndfile.SF_FORMAT_OPUS
 	oi.Channels = 1
 	oi.Samplerate = sampleRate
+	// FIXME use dynamic tempfile
 	out, err := sndfile.Open("/tmp/foo.ogg", sndfile.Write, &oi)
 	if err != nil {
 		panic(err)

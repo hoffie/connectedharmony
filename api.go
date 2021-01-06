@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -317,29 +318,12 @@ func saveErrorEvent(c *gin.Context) {
 	})
 }
 
-func processRoomUserRecording(msg []byte) {
-	b := bytes.Buffer{msg}
-	pcm, err := lib.PcmFromOpusReader(c.Request.Body)
+func processRoomUserRecording(roomKey string, userToken string, msg []byte) {
+	log.Printf("got audio data from client")
+	b := bytes.NewBuffer(msg)
+	pcm, err := lib.PcmFromOpusReader(b)
 	if err != nil {
 		panic(fmt.Sprintf("failed to decode opus: %v", err))
 	}
-	c.Request.Body.Close()
-	mixer.GetChannel(c.Param("userToken")).PushPCM(pcm)
-	c.JSON(200, gin.H{"success": true})
-}
-
-func getRoomUserStream(c *gin.Context) {
-	idx, err := strconv.ParseUint(c.Param("idx"), 10, 64)
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	c.Header("Content-Type", "audio/ogg")
-	bytes, err := opusChunkRecorder.GetChunk(idx)
-	if err != nil {
-		log.Printf("cannot get chunk %d", idx)
-		return
-	}
-	c.Writer.Write(bytes)
+	mixer.GetChannel(userToken).PushPCM(pcm)
 }

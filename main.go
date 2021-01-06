@@ -28,7 +28,7 @@ var listen string
 var debug bool
 
 var mixer *lib.Mixer
-var opusChunkRecorder *lib.OpusChunkRecorder
+var opusChunkStreamer *lib.OpusChunkStreamer
 
 func init() {
 	flag.StringVar(&staticPath, "staticPath", "./static", "path to the directory containing static files")
@@ -70,8 +70,6 @@ func main() {
 		Output: o,
 	}
 	mixer.AddOutput(pcmr)
-	opusChunkRecorder = lib.NewOpusChunkRecorder()
-	mixer.AddOutput(opusChunkRecorder)
 	go mixer.Produce()
 
 	router = gin.Default()
@@ -80,11 +78,19 @@ func main() {
 	}
 
 	ws := melody.New()
+	ws.Config.MaxMessageSize = 100 * 1024 * 1024
+	ws.Config.MessageBufferSize = 16
 	router.GET("/api/rooms/:roomKey/websocket", func(c *gin.Context) {
 		ws.HandleRequest(c.Writer, c.Request)
 	})
-	ws.HandleMessage(func(s *melody.Session, msg []byte) {
-		processRoomUserRecording(msg)
+	ws.HandleConnect(func(s *melody.Session) {
+		streamer := lib.NewOpusChunkStreamer(s)
+		mixer.AddOutput(streamer)
+	})
+	ws.HandleMessageBinary(func(s *melody.Session, msg []byte) {
+		roomKey := "fixme"
+		userToken := "fixme"
+		processRoomUserRecording(roomKey, userToken, msg)
 	})
 
 	router.StaticFile("/", filepath.Join(uiPath, "index.html"))
@@ -96,7 +102,6 @@ func main() {
 	router.GET("/api/project/:projectKey", getProject)
 	router.POST("/api/project/:projectKey/recording", saveRecordingMetadata)
 	router.PUT("/api/project/:projectKey/recording/:recordingToken", saveRecordingFile)
-	router.GET("/api/rooms/:roomKey/user/:userToken/mix/:idx", getRoomUserStream)
 	router.POST("/api/errors", saveErrorEvent)
 	router.Run(listen)
 }

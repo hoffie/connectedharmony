@@ -78,7 +78,7 @@ func (mc *MixerChannel) PushPCM(pcm []int16) {
 	mc.bufferMtx.Lock()
 	defer mc.bufferMtx.Unlock()
 	mc.buffer = append(mc.buffer, pcm...)
-	if len(mc.buffer) > oneIntervalInSamples*3 {
+	if len(mc.buffer) > oneIntervalInSamples*5 {
 		log.Printf("FIXME buffer getting too large")
 	}
 }
@@ -90,6 +90,8 @@ func (mc *MixerChannel) PullOneInterval() [oneIntervalInSamples]int16 {
 	copy(ret[:], mc.buffer)
 	if len(mc.buffer) < oneIntervalInSamples {
 		print("FIXME buffer underflow")
+		//FIXME count metric
+		//FIXME track number of missing samples and discard them once arriving
 		return ret
 	}
 	mc.buffer = mc.buffer[oneIntervalInSamples:]
