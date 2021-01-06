@@ -1,14 +1,14 @@
 package lib
 
 import (
-	"sync"
 	"log"
+	"sync"
 	"time"
 )
 
 const sampleRate = 48000
-const tickIntervalMs = 200 // ms
-const oneIntervalInSamples = sampleRate * 0.2
+const tickIntervalMs = 1000 // ms
+const oneIntervalInSamples = sampleRate * tickIntervalMs / 1000
 
 type AudioSink interface {
 	PushPCM(pcm []int16)
@@ -26,10 +26,11 @@ func NewMixer() *Mixer {
 }
 
 type MixerChannel struct {
-	Name         string
-	delaySamples int
-	buffer       []int16 // ring buffer, 3 seconds?
-	bufferMtx    sync.Mutex
+	Name           string
+	delaySamples   int
+	buffer         []int16 // ring buffer, 3 seconds?
+	bufferMtx      sync.Mutex
+	discardSamples int
 }
 
 func (m *Mixer) GetChannel(name string) *MixerChannel {
@@ -74,12 +75,27 @@ func addToMix(base *[oneIntervalInSamples]int16, add [oneIntervalInSamples]int16
 }
 
 func (mc *MixerChannel) PushPCM(pcm []int16) {
+	log.Printf("MixerChannel.PushPCM: got %d samples", len(pcm))
 	// Appends the given PCM data to the client with the given name
 	mc.bufferMtx.Lock()
 	defer mc.bufferMtx.Unlock()
 	mc.buffer = append(mc.buffer, pcm...)
+	if mc.discardSamples > 0 {
+		// have we already returned silence due to missing data?
+		// then we have to discard the fresh data partially here
+		// in order to avoid getting out of sync.
+		if mc.discardSamples < len(mc.buffer) {
+			// we got enough new data, discard just as much as necessary
+			mc.buffer = mc.buffer[mc.discardSamples:]
+			mc.discardSamples = 0
+		} else {
+			// we still have too little data. discard everything. :(
+			mc.discardSamples -= len(mc.buffer)
+			mc.buffer = []int16{}
+		}
+	}
 	if len(mc.buffer) > oneIntervalInSamples*5 {
-		log.Printf("FIXME buffer getting too large")
+		log.Printf("MixerChannel.PushPCM: buffer too large (%d samples)", len(mc.buffer))
 	}
 }
 
@@ -89,9 +105,9 @@ func (mc *MixerChannel) PullOneInterval() [oneIntervalInSamples]int16 {
 	var ret [oneIntervalInSamples]int16
 	copy(ret[:], mc.buffer)
 	if len(mc.buffer) < oneIntervalInSamples {
-		print("FIXME buffer underflow")
+		log.Printf("MixerChannel.PullOneInterval: buffer underflow, returning silence")
 		//FIXME count metric
-		//FIXME track number of missing samples and discard them once arriving
+		mc.discardSamples += oneIntervalInSamples - len(mc.buffer)
 		return ret
 	}
 	mc.buffer = mc.buffer[oneIntervalInSamples:]

@@ -78,7 +78,7 @@ func main() {
 	}
 
 	ws := melody.New()
-	ws.Config.MaxMessageSize = 100 * 1024 * 1024
+	ws.Config.MaxMessageSize = 1024 * 1024 * 1024
 	ws.Config.MessageBufferSize = 16
 	router.GET("/api/rooms/:roomKey/websocket", func(c *gin.Context) {
 		ws.HandleRequest(c.Writer, c.Request)

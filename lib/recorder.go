@@ -62,13 +62,12 @@ func (ocs *OpusChunkStreamer) PushPCM(pcm []int16) {
 }
 
 func (ocs *OpusChunkStreamer) encode() {
-	const chunkSize = sampleRate / 5 // 0.2s
 	ocs.bufferMtx.Lock()
 	defer ocs.bufferMtx.Unlock()
 	var pcmChunk []int16
-	for len(ocs.pcm) >= chunkSize {
-		pcmChunk = ocs.pcm[:chunkSize]
-		ocs.pcm = ocs.pcm[chunkSize:]
+	for len(ocs.pcm) >= oneIntervalInSamples {
+		pcmChunk = ocs.pcm[:oneIntervalInSamples]
+		ocs.pcm = ocs.pcm[oneIntervalInSamples:]
 		ocs.handleChunk(pcmChunk)
 	}
 }

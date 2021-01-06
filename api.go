@@ -324,5 +324,6 @@ func processRoomUserRecording(roomKey string, userToken string, msg []byte) {
 	if err != nil {
 		panic(fmt.Sprintf("failed to decode opus: %v", err))
 	}
+	log.Printf("got %d samples", len(pcm))
 	mixer.GetChannel(userToken).PushPCM(pcm)
 }

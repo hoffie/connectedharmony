@@ -10,12 +10,13 @@ Features
   - aggregate: emotions -- "13 raised hands"?
 
 - regularly updated small profile pictures
+- instrument/voice indicator
 - full video support?
 - modes:
   - Flow (Row 0 -> Row 1 -> ...)
   - Solo (everyone muted except soloist, soloist should not hear themself)
 - dynamic row change
-- listener mode (last row enforced?)
+- listener "read only" mode (last row enforced?)
 - latency callibration (record claps, auto-calculate or let user align waveforms?)
 - auto reconnect
 - recording
@@ -27,6 +28,8 @@ Features
 - reverb
 - resampling for rates other 48khz -> client-side?
 - support for non-opus (aac?) -> client-side?
+- score sharing
+- hear-same-row mode
 
 Views
 =====
@@ -34,13 +37,16 @@ Views
 - Room
 
 # Naming
-Pulse, Flow, Rooms, Adaptive, Perceived Live
-
-API
-===
-POST /api/flow/:roomKey/user {name: foo} -> {token: foo}
-POST /api/flow/:roomKey/user/:token/recording
-GET /api/flow/:roomKey/user/:token/stream
+Pulse
+Flow
+Rooms
+Adaptive
+Perceived Live
+Serial
+Perceived
+Live Perception
+Foundation
+Layered
 
 TODO
 ====

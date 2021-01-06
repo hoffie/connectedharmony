@@ -42,16 +42,14 @@ const Room = {
     onMedia: function(stream) {
       this.mediaStream = stream;
       var config = {
-        type: 'audio',
-        mimeType: 'audio/webm;codecs=opus',
+        mimeType: 'audio/ogg;codecs=opus',
         audioBitsPerSecond: 128*1000,
-        ondataavailable: this.uploadChunk,
-        timeSlice: 200,
       }
-      this.recordRTC = RecordRTC(this.mediaStream, config);
+      this.mediaRecorder = new MediaRecorder(this.mediaStream, config);
+      this.mediaRecorder.ondataavailable = this.uploadChunk;
 
-      // FIXME wss support
-      this.streamWs = new WebSocket('ws://' + window.location.host + '/api/rooms/FIXME/websocket')
+      var protocol = 'ws' + (window.location.protocol == 'https:' ? 's' : '') + '://';
+      this.streamWs = new WebSocket(protocol + window.location.host + '/api/rooms/FIXME/websocket')
       this.streamWs.binaryType = 'arraybuffer';
       this.streamWs.onerror = function(err) {
         console.log("uploadRecording: Upload error (unsuccessful return code)", err);
@@ -61,37 +59,44 @@ const Room = {
       this.streamWs.onmessage = this.scheduleChunkPlayback;
     },
     scheduleChunkPlayback: function(event) {
+      var localTimeBudget = 1.0; // s
+      var chunkLength = 1.0; // s
+      if (!this.streamStartTime) {
+        this.streamStartTime = this.audioContext.currentTime;
+      }
+      this.streamPosition++;
+      var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength
+      var recorderRampUpTime = 0.02;
+      var timeToStart = startTime - this.audioContext.currentTime - recorderRampUpTime;
+      if (timeToStart < 0.1) {
+        // if we are this late, it's unrealistical to decode within
+        // the next 100ms. therefore, drop this segment to catch up.
+        // FIXME: error metric
+        return;
+      }
       var audioData = event.data;
       var source = this.audioContext.createBufferSource();
+      source.connect(this.audioContext.destination);
       this.audioContext.decodeAudioData(audioData,
         function(buffer) {
           source.buffer = buffer;
-          source.connect(this.audioContext.destination);
-          var localTimeBudget = 0.150; // s
-          var chunkLength = 0.2; // s
-          if (!this.streamStartTime) {
-            this.streamStartTime = this.audioContext.currentTime;
-          }
-          this.streamPosition++;
-          var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength
           source.start(startTime);
           if (this.recording) {
             return;
           }
           this.recording = true;
-          var recorderRampUpTime = 0.01;
-          var timeToStart = startTime - this.audioContext.currentTime - recorderRampUpTime;
           window.setTimeout(function() {
-            this.recordRTC.startRecording();
+            console.log("starting recording", this.mediaRecorder);
+            this.mediaRecorder.start(500 /* timeSlice in ms */);
           }.bind(this), timeToStart);
         }.bind(this),
         function(e){ console.log("Error with decoding audio data: " + e);
       }.bind(this));
     },
-    uploadChunk: function(blob) {
-      this.streamWs.send(blob);
-      // clean up to avoid memory leaks:
-      this.recordRTC.getInternalRecorder().getArrayOfBlobs().splice(0)
+    uploadChunk: function(event) {
+      // Firefox records in Blobs, but doesn't support them in
+      // WebSocket.send; therefore, we have to convert to an arraybuffer...
+      this.streamWs.send(event.data);
     },
   },
 }
