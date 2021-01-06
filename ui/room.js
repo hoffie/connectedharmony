@@ -5,6 +5,7 @@ const Room = {
       joining: false,
       participantName: '',
       streamPosition: 0,
+      recording: false,
     };
   },
   methods: {
@@ -42,7 +43,7 @@ const Room = {
       this.mediaStream = stream;
       var config = {
         type: 'audio',
-        mimeType: 'audio/ogg;codecs=opus',
+        mimeType: 'audio/webm;codecs=opus',
         audioBitsPerSecond: 128*1000,
         ondataavailable: this.uploadChunk,
         timeSlice: 200,
@@ -58,10 +59,8 @@ const Room = {
       };
       //FIXME monitor bufferedAmount
       this.streamWs.onmessage = this.scheduleChunkPlayback;
-      this.recordRTC.startRecording();
     },
     scheduleChunkPlayback: function(event) {
-      console.log(event);
       var audioData = event.data;
       var source = this.audioContext.createBufferSource();
       this.audioContext.decodeAudioData(audioData,
@@ -74,14 +73,23 @@ const Room = {
             this.streamStartTime = this.audioContext.currentTime;
           }
           this.streamPosition++;
-          source.start(this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength);
+          var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength
+          source.start(startTime);
+          if (this.recording) {
+            return;
+          }
+          this.recording = true;
+          var recorderRampUpTime = 0.01;
+          var timeToStart = startTime - this.audioContext.currentTime - recorderRampUpTime;
+          window.setTimeout(function() {
+            this.recordRTC.startRecording();
+          }.bind(this), timeToStart);
         }.bind(this),
         function(e){ console.log("Error with decoding audio data: " + e);
       }.bind(this));
     },
     uploadChunk: function(blob) {
       this.streamWs.send(blob);
-      //this.streamWs.send("foo");
       // clean up to avoid memory leaks:
       this.recordRTC.getInternalRecorder().getArrayOfBlobs().splice(0)
     },

@@ -9,6 +9,8 @@ import (
 	"github.com/hraban/opus"
 )
 
+// TODO: use libsndfile to support webm, etc. (chrome)
+
 var opusStream *opus.Stream
 var opusBuffer = &wrappedByteBuffer{
 	buffer: &bytes.Buffer{},

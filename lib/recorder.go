@@ -3,8 +3,9 @@ package lib
 import (
 	"io"
 	"io/ioutil"
-	"sync"
 	"log"
+	"os"
+	"sync"
 
 	"github.com/hoffie/gosndfile/sndfile"
 )
@@ -38,10 +39,10 @@ func samplesToBytes(s []int16) []byte {
 }
 
 type OpusChunkStreamer struct {
-	buffer                 []int16
-	bufferMtx              sync.Mutex
-	stream Streamer
-	pcm                    []int16
+	buffer    []int16
+	bufferMtx sync.Mutex
+	stream    Streamer
+	pcm       []int16
 }
 
 type Streamer interface {
@@ -101,8 +102,12 @@ func pcmToOggOpus(pcm []int16) []byte {
 	oi.Format = sndfile.SF_FORMAT_OGG | sndfile.SF_FORMAT_OPUS
 	oi.Channels = 1
 	oi.Samplerate = sampleRate
-	// FIXME use dynamic tempfile
-	out, err := sndfile.Open("/tmp/foo.ogg", sndfile.Write, &oi)
+	outputMemfd, err := memfile("target", []byte{})
+	if err != nil {
+		panic(err)
+	}
+	out, err := sndfile.OpenFd(uintptr(outputMemfd), sndfile.Write, &oi, false /* we close outpoutMemfd ourselves */)
+	// will be closed explicitly below
 	if err != nil {
 		panic(err)
 	}
@@ -123,7 +128,13 @@ func pcmToOggOpus(pcm []int16) []byte {
 		}
 	}
 	out.Close() // must be done before reading the output again
-	c, err := ioutil.ReadFile("/tmp/foo.ogg")
+	f := os.NewFile(uintptr(outputMemfd), "outputMemFd")
+	defer f.Close()
+	_, err = f.Seek(0, os.SEEK_SET)
+	if err != nil {
+		panic("could not seek memfd")
+	}
+	c, err := ioutil.ReadAll(f)
 	if err != nil {
 		panic(err)
 	}

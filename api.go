@@ -319,7 +319,6 @@ func saveErrorEvent(c *gin.Context) {
 }
 
 func processRoomUserRecording(roomKey string, userToken string, msg []byte) {
-	log.Printf("got audio data from client")
 	b := bytes.NewBuffer(msg)
 	pcm, err := lib.PcmFromOpusReader(b)
 	if err != nil {

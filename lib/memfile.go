@@ -26,6 +26,10 @@ func memfile(name string, b []byte) (int, error) {
 		return 0, fmt.Errorf("Ftruncate: %v", err)
 	}
 
+	if len(b) <= 0 {
+		return fd, nil
+	}
+
 	data, err := unix.Mmap(fd, 0, len(b), unix.PROT_READ|unix.PROT_WRITE, unix.MAP_SHARED)
 	if err != nil {
 		return 0, fmt.Errorf("Mmap: %v", err)
