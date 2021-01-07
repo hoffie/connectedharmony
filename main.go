@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hoffie/connectedharmony/lib"
+	"github.com/hoffie/connectedharmony/pkg/media"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/olahol/melody.v1"
@@ -27,8 +27,8 @@ var dataPath string
 var listen string
 var debug bool
 
-var mixer *lib.Mixer
-var opusChunkStreamer *lib.OpusChunkStreamer
+var mixer *media.Mixer
+var opusChunkStreamer *media.OpusChunkStreamer
 
 func init() {
 	flag.StringVar(&staticPath, "staticPath", "./static", "path to the directory containing static files")
@@ -61,12 +61,12 @@ func main() {
 	db.AutoMigrate(&ErrorEvent{})
 
 	// FIXME: create per-room-user combination
-	mixer = lib.NewMixer()
+	mixer = media.NewMixer()
 	o, err := os.Create("/tmp/recording.pcm")
 	if err != nil {
 		panic(err)
 	}
-	pcmr := &lib.PCMRecorder{
+	pcmr := &media.PCMRecorder{
 		Output: o,
 	}
 	mixer.AddOutput(pcmr)
@@ -84,7 +84,7 @@ func main() {
 		ws.HandleRequest(c.Writer, c.Request)
 	})
 	ws.HandleConnect(func(s *melody.Session) {
-		streamer := lib.NewOpusChunkStreamer(s)
+		streamer := media.NewOpusChunkStreamer(s)
 		mixer.AddOutput(streamer)
 	})
 	ws.HandleMessageBinary(func(s *melody.Session, msg []byte) {

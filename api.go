@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hoffie/connectedharmony/lib"
+	"github.com/hoffie/connectedharmony/pkg/media"
 
 	"github.com/gin-gonic/gin"
 
@@ -320,7 +320,7 @@ func saveErrorEvent(c *gin.Context) {
 
 func processRoomUserRecording(roomKey string, userToken string, msg []byte) {
 	b := bytes.NewBuffer(msg)
-	pcm, err := lib.PcmFromOpusReader(b)
+	pcm, err := media.PcmFromOpusReader(b)
 	if err != nil {
 		panic(fmt.Sprintf("failed to decode opus: %v", err))
 	}
