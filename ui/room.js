@@ -42,14 +42,13 @@ const Room = {
     onMedia: function(stream) {
       this.mediaStream = stream;
       var config = {
-        mimeType: 'audio/ogg;codecs=opus',
         audioBitsPerSecond: 128*1000,
       }
       this.mediaRecorder = new MediaRecorder(this.mediaStream, config);
       this.mediaRecorder.ondataavailable = this.uploadChunk;
 
       var protocol = 'ws' + (window.location.protocol == 'https:' ? 's' : '') + '://';
-      this.streamWs = new WebSocket(protocol + window.location.host + '/api/rooms/FIXME/websocket')
+      this.streamWs = new WebSocket(protocol + window.location.host + '/api/rooms/FIXME/user/FIXME/websocket')
       this.streamWs.binaryType = 'arraybuffer';
       this.streamWs.onerror = function(err) {
         console.log("uploadRecording: Upload error (unsuccessful return code)", err);
@@ -59,19 +58,21 @@ const Room = {
       this.streamWs.onmessage = this.scheduleChunkPlayback;
     },
     scheduleChunkPlayback: function(event) {
-      var localTimeBudget = 1.0; // s
-      var chunkLength = 1.0; // s
+      var chunkLength = 0.4; // s
+      var localTimeBudget = chunkLength; // seconds for downloading/decoding a segment
       if (!this.streamStartTime) {
         this.streamStartTime = this.audioContext.currentTime;
       }
       this.streamPosition++;
-      var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength
+      var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength;
       var recorderRampUpTime = 0.02;
       var timeToStart = startTime - this.audioContext.currentTime - recorderRampUpTime;
-      if (timeToStart < 0.1) {
+      console.log("time to start is " + timeToStart);
+      if (timeToStart < 0.01) {
         // if we are this late, it's unrealistical to decode within
-        // the next 100ms. therefore, drop this segment to catch up.
+        // the next 10ms. therefore, drop this segment to catch up.
         // FIXME: error metric
+        console.log("dropping late sample");
         return;
       }
       var audioData = event.data;
@@ -87,14 +88,18 @@ const Room = {
           this.recording = true;
           window.setTimeout(function() {
             console.log("starting recording", this.mediaRecorder);
-            this.mediaRecorder.start(500 /* timeSlice in ms */);
+            this.mediaRecorder.start(400 /* timeSlice in ms */);
           }.bind(this), timeToStart);
         }.bind(this),
         function(e){ console.log("Error with decoding audio data: " + e);
       }.bind(this));
     },
     uploadChunk: function(event) {
-      this.streamWs.send(event.data);
+      var blob = event.data;
+      if (!blob.size) {
+        return;
+      }
+      this.streamWs.send(blob);
     },
   },
 }

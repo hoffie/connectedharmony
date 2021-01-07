@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,8 +28,7 @@ var dataPath string
 var listen string
 var debug bool
 
-var mixer *media.Mixer
-var opusChunkStreamer *media.OpusChunkStreamer
+var rooms *Rooms
 
 func init() {
 	flag.StringVar(&staticPath, "staticPath", "./static", "path to the directory containing static files")
@@ -60,17 +60,7 @@ func main() {
 	db.AutoMigrate(&Voice{})
 	db.AutoMigrate(&ErrorEvent{})
 
-	// FIXME: create per-room-user combination
-	mixer = media.NewMixer()
-	o, err := os.Create("/tmp/recording.pcm")
-	if err != nil {
-		panic(err)
-	}
-	pcmr := &media.PCMRecorder{
-		Output: o,
-	}
-	mixer.AddOutput(pcmr)
-	go mixer.Produce()
+	rooms = NewRooms()
 
 	router = gin.Default()
 	if debug {
@@ -80,16 +70,26 @@ func main() {
 	ws := melody.New()
 	ws.Config.MaxMessageSize = 1024 * 1024 * 1024
 	ws.Config.MessageBufferSize = 16
-	router.GET("/api/rooms/:roomKey/websocket", func(c *gin.Context) {
-		ws.HandleRequest(c.Writer, c.Request)
+	router.GET("/api/rooms/:roomKey/user/:userToken/websocket", func(c *gin.Context) {
+		ws.HandleRequestWithKeys(c.Writer, c.Request, map[string]interface{}{
+			"roomKey":   c.Param("roomKey"),
+			"userToken": c.Param("userToken"),
+		})
 	})
 	ws.HandleConnect(func(s *melody.Session) {
+		roomKey := s.MustGet("roomKey")
+		userToken := s.MustGet("userToken")
+		room := rooms.Get(roomKey.(string))
+		err := room.AddUser(userToken.(string))
+		if err != nil {
+			panic(fmt.Sprintf("failed to add user: %v", err))
+		}
 		streamer := media.NewOpusChunkStreamer(s)
-		mixer.AddOutput(streamer)
+		room.Mixer.AddOutput(streamer)
 	})
 	ws.HandleMessageBinary(func(s *melody.Session, msg []byte) {
-		roomKey := "fixme"
-		userToken := "fixme"
+		roomKey := s.MustGet("roomKey").(string)
+		userToken := s.MustGet("userToken").(string)
 		processRoomUserRecording(roomKey, userToken, msg)
 	})
 

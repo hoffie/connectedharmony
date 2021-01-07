@@ -1,84 +1,73 @@
 package media
 
 import (
-	"io"
-	"io/ioutil"
-	"bytes"
+	"encoding/binary"
 	"log"
+	"sync"
 
-	"github.com/hraban/opus"
+	"github.com/notedit/gst"
 )
 
-// TODO: use libsndfile to support webm, etc. (chrome)
-
-var opusStream *opus.Stream
-var opusBuffer = &wrappedByteBuffer{
-	buffer: &bytes.Buffer{},
+func bytesToInt16(bs []byte) []int16 {
+	is := make([]int16, len(bs)/2)
+	for x := 0; x < len(bs)/2; x += 2 {
+		is[x] = int16(binary.LittleEndian.Uint16([]byte{bs[x*2], bs[x*2+1]}))
+	}
+	return is
 }
 
-type wrappedByteBuffer struct {
-	// Basically emulates a bytes.Buffer but ensures
-	// that the buffer is accessed by reference.
-	// This works around a problem in the opus library C/Go interaction
-	// which should probably fixed on the go-opus side.
-	// TODO: raise ticket
-	buffer *bytes.Buffer
+type DecodeToPCM struct {
+	target   AudioSink
+	pipeline *gst.Pipeline
+	appsrc   *gst.Element
+	appsink  *gst.Element
+	mtx      *sync.Mutex
 }
 
-func (wbb *wrappedByteBuffer) Read(data []byte) (int, error) {
-	return wbb.buffer.Read(data)
+func NewDecodeToPCM(target AudioSink) *DecodeToPCM {
+	pipeline, err := gst.ParseLaunch("appsrc name=appsrc format=time is-live=true do-timestamp=true max-bytes=16384 block=true ! decodebin3 ! audioconvert ! audioresample ! audio/x-raw,format=S16LE,channels=1,rate=48000 ! appsink name=appsink")
+	if err != nil {
+		panic(err)
+	}
+
+	//targetCaps := gst.CapsFromString("audio/x-raw,format=S16LE,channels=1,rate=48000")
+	appsrc := pipeline.GetByName("appsrc")
+	appsink := pipeline.GetByName("appsink")
+	//appsink.SetObject("caps", targetCaps)
+
+	pipeline.SetState(gst.StatePlaying)
+
+	go func() {
+		for {
+			sample, err := appsink.PullSample()
+			if err != nil {
+				if appsink.IsEOS() {
+					log.Printf("done")
+					return
+				}
+				panic(err)
+			}
+			target.PushPCM(bytesToInt16(sample.Data))
+		}
+	}()
+
+	return &DecodeToPCM{
+		target:   target,
+		pipeline: pipeline,
+		appsrc:   appsrc,
+		appsink:  appsink,
+	}
 }
 
-func (wbb *wrappedByteBuffer) Write(data []byte) (int, error) {
-	return wbb.buffer.Write(data)
+func (dtp *DecodeToPCM) Stop() {
+	dtp.appsrc.SendEvent(gst.NewEosEvent())
+	dtp.pipeline.SetState(gst.StateNull)
 }
 
-func (wbb *wrappedByteBuffer) Len() (int) {
-	return wbb.buffer.Len()
-}
-
-func initOpusStream() error {
-	if opusStream != nil {
+func (dtp *DecodeToPCM) PushEncoded(b []byte) error {
+	if len(b) == 0 {
+		// pushing nothing is no error, but would crash gst:
 		return nil
 	}
-	const channels = 1
-	var err error
-	//FIXME per user
-	opusStream, err = opus.NewStream(opusBuffer)
-	return err
-}
-
-func PcmFromOpusReader(o io.Reader) ([]int16, error) {
-	// FIXME global but should be per user
-	var frameSizeMs float32 = 60 // max
-	const channels = 1
-	frameSize := channels * frameSizeMs * sampleRate / 1000
-	opusBytes, err := ioutil.ReadAll(o)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = opusBuffer.Write(opusBytes)
-	if err != nil {
-		return nil, err
-	}
-	for opusBuffer.Len() < 2048 {
-		return []int16{}, nil
-	}
-	err = initOpusStream()
-	if err != nil {
-		return nil, err
-	}
-	var allPCM []int16
-	pcm := make([]int16, int(frameSize))
-	for opusBuffer.Len() > 1 {
-		n, err := opusStream.Read(pcm)
-		if err != nil {
-			log.Printf("opus decoder saw %v", err)
-			return nil, err
-		}
-		pcm = pcm[:n*channels]
-		allPCM = append(allPCM, pcm...)
-	}
-	return allPCM, nil
+	return dtp.appsrc.PushBuffer(b)
 }

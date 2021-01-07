@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -13,8 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hoffie/connectedharmony/pkg/media"
 
 	"github.com/gin-gonic/gin"
 
@@ -319,11 +316,14 @@ func saveErrorEvent(c *gin.Context) {
 }
 
 func processRoomUserRecording(roomKey string, userToken string, msg []byte) {
-	b := bytes.NewBuffer(msg)
-	pcm, err := media.PcmFromOpusReader(b)
+	room := rooms.Get(roomKey)
+	user, err := room.GetUser(userToken)
+	if err != nil {
+		panic(fmt.Sprintf("failed to get user: %v", err))
+	}
+	decodeToPCM := user.DecodeToPCM
+	err = decodeToPCM.PushEncoded(msg)
 	if err != nil {
 		panic(fmt.Sprintf("failed to decode opus: %v", err))
 	}
-	log.Printf("got %d samples", len(pcm))
-	mixer.GetChannel(userToken).PushPCM(pcm)
 }

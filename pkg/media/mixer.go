@@ -7,7 +7,7 @@ import (
 )
 
 const sampleRate = 48000
-const tickIntervalMs = 1000 // ms
+const tickIntervalMs = 400 // ms
 const oneIntervalInSamples = sampleRate * tickIntervalMs / 1000
 
 type AudioSink interface {
@@ -22,13 +22,14 @@ type Mixer struct {
 func NewMixer() *Mixer {
 	return &Mixer{
 		channels: make(map[string]*MixerChannel),
+		outputs:  make([]AudioSink, 0),
 	}
 }
 
 type MixerChannel struct {
 	Name           string
 	delaySamples   int
-	buffer         []int16 // ring buffer, 3 seconds?
+	buffer         []int16
 	bufferMtx      sync.Mutex
 	discardSamples int
 }
@@ -43,7 +44,8 @@ func (m *Mixer) GetChannel(name string) *MixerChannel {
 
 func (m *Mixer) AddChannel(name string) {
 	m.channels[name] = &MixerChannel{
-		Name: name,
+		Name:   name,
+		buffer: make([]int16, oneIntervalInSamples*3), // ramp up time
 	}
 }
 
@@ -75,7 +77,6 @@ func addToMix(base *[oneIntervalInSamples]int16, add [oneIntervalInSamples]int16
 }
 
 func (mc *MixerChannel) PushPCM(pcm []int16) {
-	log.Printf("MixerChannel.PushPCM: got %d samples", len(pcm))
 	// Appends the given PCM data to the client with the given name
 	mc.bufferMtx.Lock()
 	defer mc.bufferMtx.Unlock()
@@ -105,7 +106,7 @@ func (mc *MixerChannel) PullOneInterval() [oneIntervalInSamples]int16 {
 	var ret [oneIntervalInSamples]int16
 	copy(ret[:], mc.buffer)
 	if len(mc.buffer) < oneIntervalInSamples {
-		log.Printf("MixerChannel.PullOneInterval: buffer underflow, returning silence")
+		log.Printf("MixerChannel.PullOneInterval: buffer underflow, returning %d samples silence", oneIntervalInSamples-len(mc.buffer))
 		//FIXME count metric
 		mc.discardSamples += oneIntervalInSamples - len(mc.buffer)
 		return ret

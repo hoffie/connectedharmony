@@ -10,8 +10,8 @@ Features
   - aggregate: emotions -- "13 raised hands"?
 
 - regularly updated small profile pictures
-- instrument/voice indicator
 - full video support?
+- instrument/voice indicator
 - modes:
   - Flow (Row 0 -> Row 1 -> ...)
   - Solo (everyone muted except soloist, soloist should not hear themself)
@@ -25,9 +25,9 @@ Features
   - left/right panning
   - volume per row
   - group by voice (for volume adjustments)
-- reverb
-- resampling for rates other 48khz -> client-side?
-- support for non-opus (aac?) -> client-side?
+- reverb via gst?
+[x] resampling for rates other 48khz
+[x] support for non-opus (aac?)
 - score sharing
 - hear-same-row mode
 
@@ -47,6 +47,9 @@ Perceived
 Live Perception
 Foundation
 Layered
+Phase
+Stage
+Delay
 
 TODO
 ====
