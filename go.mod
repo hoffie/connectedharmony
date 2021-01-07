@@ -7,7 +7,6 @@ require (
 	github.com/gin-gonic/gin v1.6.2
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hoffie/gosndfile v0.0.0-20201225225151-d3dcf8a1225a
-	github.com/hraban/opus v0.0.0-20201025103112-d779bb1cc5a2
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/notedit/gst v0.0.8
