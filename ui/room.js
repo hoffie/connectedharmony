@@ -67,11 +67,11 @@ const Room = {
       var startTime = this.streamStartTime + localTimeBudget + this.streamPosition * chunkLength;
       var recorderRampUpTime = 0.02;
       var timeToStart = startTime - this.audioContext.currentTime - recorderRampUpTime;
-      console.log("time to start is " + timeToStart);
       if (timeToStart < 0.01) {
         // if we are this late, it's unrealistical to decode within
         // the next 10ms. therefore, drop this segment to catch up.
         // FIXME: error metric
+        console.log("time to start is " + timeToStart + ", pos=" + this.streamPosition);
         console.log("dropping late sample");
         return;
       }

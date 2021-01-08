@@ -62,7 +62,7 @@ func (m *Mixer) Produce() {
 			addToMix(&pcm, channelPCM)
 		}
 		for _, output := range m.outputs {
-			output.PushPCM(pcm[:])
+			go output.PushPCM(pcm[:])
 		}
 	}
 }

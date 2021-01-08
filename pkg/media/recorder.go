@@ -2,12 +2,10 @@ package media
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
-	"os"
 	"sync"
 
-	"github.com/hoffie/gosndfile/sndfile"
+	"github.com/notedit/gst"
 )
 
 type PCMRecorder struct {
@@ -39,10 +37,9 @@ func samplesToBytes(s []int16) []byte {
 }
 
 type OpusChunkStreamer struct {
-	buffer    []int16
-	bufferMtx sync.Mutex
-	stream    Streamer
-	pcm       []int16
+	pcmMtx sync.Mutex
+	stream Streamer
+	pcm    []int16
 }
 
 type Streamer interface {
@@ -62,8 +59,8 @@ func (ocs *OpusChunkStreamer) PushPCM(pcm []int16) {
 }
 
 func (ocs *OpusChunkStreamer) encode() {
-	ocs.bufferMtx.Lock()
-	defer ocs.bufferMtx.Unlock()
+	ocs.pcmMtx.Lock()
+	defer ocs.pcmMtx.Unlock()
 	var pcmChunk []int16
 	for len(ocs.pcm) >= oneIntervalInSamples {
 		pcmChunk = ocs.pcm[:oneIntervalInSamples]
@@ -73,69 +70,51 @@ func (ocs *OpusChunkStreamer) encode() {
 }
 
 func (ocs *OpusChunkStreamer) handleChunk(pcmChunk []int16) {
-	// may only be called from encode() which holds the buffer lock
-	chunk := pcmToOggOpus(pcmChunk)
-	err := ocs.stream.WriteBinary(chunk)
+	// may only be called from encode() which holds the pcmMtx
+	chunk, err := encodePCMChunk(pcmChunk)
 	if err != nil {
-		log.Printf("err=%v", err)
-		log.Printf("FIXME cannot write to stream")
+		log.Printf("failed to encode to opus: %v", err)
+		return
+	}
+	err = ocs.stream.WriteBinary(chunk)
+	if err != nil {
+		log.Printf("cannot write to streamer: %v", err)
+		return
 	}
 }
 
-func pcmToOggOpus(pcm []int16) []byte {
-	var ii sndfile.Info
-	ii.Format = sndfile.SF_FORMAT_RAW | sndfile.SF_FORMAT_PCM_16
-	ii.Channels = 1
-	ii.Samplerate = sampleRate
-	fd, err := memfile("source", samplesToBytes(pcm))
+func encodePCMChunk(pcm []int16) ([]byte, error) {
+	pipeline, err := gst.ParseLaunch("appsrc name=appsrc is-live=false do-timestamp=false block=true ! rawaudioparse format=pcm pcm-format=s16le num-channels=1 sample-rate=48000 use-sink-caps=false ! audioconvert ! queue ! opusenc bitrate=128000 bitrate-type=constrained-vbr ! webmmux ! queue ! appsink name=appsink sync=false")
 	if err != nil {
-		panic(err)
-	}
-	in, err := sndfile.OpenFd(uintptr(fd), sndfile.Read, &ii, true)
-	if err != nil {
-		panic(err)
-	}
-	defer in.Close()
-
-	var oi sndfile.Info
-	oi.Format = sndfile.SF_FORMAT_OGG | sndfile.SF_FORMAT_OPUS
-	oi.Channels = 1
-	oi.Samplerate = sampleRate
-	outputMemfd, err := memfile("target", []byte{})
-	if err != nil {
-		panic(err)
-	}
-	out, err := sndfile.OpenFd(uintptr(outputMemfd), sndfile.Write, &oi, false /* we close outpoutMemfd ourselves */)
-	// will be closed explicitly below
-	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	buf := make([]int32, 1024)
-	for {
-		r, err := in.ReadItems(buf)
+	pipeline.SetState(gst.StatePlaying)
+	defer pipeline.SetState(gst.StateNull)
+
+	go func() {
+		appsrc := pipeline.GetByName("appsrc")
+		pcmBytes := samplesToBytes(pcm)
+		err := appsrc.PushBuffer(pcmBytes)
 		if err != nil {
 			panic(err)
 		}
-		if r == 0 {
+		appsrc.EndOfStream()
+	}()
+
+	appsink := pipeline.GetByName("appsink")
+	encoded := []byte{}
+	for {
+		sample, err := appsink.PullSample()
+		if err != nil {
+			if appsink.IsEOS() {
+				break
+			}
+			log.Printf("error during reading from appsink: %v", err)
 			break
 		}
-		buf = buf[:r]
-		_, err = out.WriteItems(buf)
-		if err != nil {
-			panic(err)
-		}
+		encoded = append(encoded, sample.Data...)
 	}
-	out.Close() // must be done before reading the output again
-	f := os.NewFile(uintptr(outputMemfd), "outputMemFd")
-	defer f.Close()
-	_, err = f.Seek(0, os.SEEK_SET)
-	if err != nil {
-		panic("could not seek memfd")
-	}
-	c, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
-	return c
+
+	return encoded, nil
 }

@@ -30,12 +30,10 @@ func NewDecodeToPCM(target AudioSink) *DecodeToPCM {
 		panic(err)
 	}
 
-	//targetCaps := gst.CapsFromString("audio/x-raw,format=S16LE,channels=1,rate=48000")
+	pipeline.SetState(gst.StatePlaying)
+
 	appsrc := pipeline.GetByName("appsrc")
 	appsink := pipeline.GetByName("appsink")
-	//appsink.SetObject("caps", targetCaps)
-
-	pipeline.SetState(gst.StatePlaying)
 
 	go func() {
 		for {
