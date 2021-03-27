@@ -212,7 +212,7 @@
               <v-alert dense type="success" outlined icon="mdi-check" class="body-2">
                 Für die Aufnahme werden die Bild-/Ton-Aufnahme, der angegebene Name und technische Daten wie Browser-Version, Fehlermeldungen, IP-Adresse zum Betreiber dieser Web-App hochgeladen.
                 Die Übertragung erfolgt verschlüsselt.
-                Die erhobenen Daten werden ausschließlich für die Aufnahme genutzt und den Verantwortlichen ({{ project.Ensemble }}) weitergeleitet. Nach Fertigstellung werden die Einzel-Aufnahmen gelöscht.
+                Die erhobenen Daten werden ausschließlich für die Aufnahme genutzt und den Verantwortlichen weitergeleitet. Nach Fertigstellung werden die Einzel-Aufnahmen gelöscht.
               </v-alert>
               <v-select :items="project.Voices" v-model="voice" return-object item-text="Name" label="Bitte wähle deine Stimme aus" />
               <v-btn large color="primary" @click="step = 2" :disabled="voice === null">
