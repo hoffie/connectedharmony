@@ -250,7 +250,7 @@
                   <v-list-item-content>
                     <v-list-item-title>Headset</v-list-item-title>
                     <p class="text--secondary">
-                      Benutze unbedingt Kopfhörer, damit du die Begleitstimme hörst und sie nicht in deiner Aufnahme stört. Stelle die Wiedergabelautstärke nur so laut wie nötig ein.
+                      Benutze unbedingt Kopfhörer, damit du die Begleitstimme hörst und sie nicht in deiner Aufnahme stört. Stelle die Wiedergabelautstärke so leise wie möglich ein.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
@@ -273,6 +273,17 @@
                     <v-list-item-title>Ruhe</v-list-item-title>
                     <p class="text--secondary">
                       Sorge für eine ruhige Umgebung: Schließe die Fenster &amp; schalte Benachrichtigungen auf stumm.
+                    </p>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item v-if="videoSupported && useVideo && project.WantVideo">
+                  <v-list-item-avatar>
+                    <v-icon>mdi-lightbulb</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Licht</v-list-item-title>
+                    <p class="text--secondary">
+                      Sorge für gutes Licht. Vermeide Gegenlicht wie Fenster im Hintergrund.
                     </p>
                   </v-list-item-content>
                 </v-list-item>
