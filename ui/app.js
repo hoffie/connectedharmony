@@ -25,7 +25,7 @@ const Project = {
       recordProgress: 0,
       referenceMediaElement: null,
       referenceSource: null,
-      referenceGainValue: 15,
+      referenceGainValue: 0,
       loadReferenceError: false,
       loadReferenceSuccess: false,
       recordedMediaElement: null,

@@ -399,8 +399,8 @@
 
               <h2 class="subtitle-1 mt-2">Begleit-Lautstärke anpassen</h2>
               <v-slider v-model="referenceGainValue" prepend-icon="mdi-playlist-music" />
-              <v-alert v-if="referenceGainValue < 15" type="warning" class="my-2">
-                Wenn du die Begleitstimme sehr leise drehen musst, um deine Aufnahme zu hören, ist vielleicht deine Aufnahme zu leise. Probiere es in diesem Fall näher am Mikrofon, mit getrageneren Tönen oder mit einer empfindlicheren Mikrofoneinstellung (z.B. am PC: Windows-Mixer).
+              <v-alert v-if="referenceGainValue <= 0" type="info" class="my-2">
+                Die Begleitstimme ist aktuell stummgeschaltet. Spiele deine Aufnahme ab und stelle sicher, das keine Störgeräusche (z.B. Brummen, Straßengeräusche) zu hören sind. Falls du trotzdem die Begleitstimme hörst, ist sie leider auf der Aufnahme gelandet. Stelle in diesem Fall deine Kopfhörer-Lautstärke leiser und nimm erneut auf.
               </v-alert>
 
               <v-alert v-if="referenceGainValue > 60" type="warning" class="my-2">
