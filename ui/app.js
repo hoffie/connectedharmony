@@ -34,7 +34,7 @@ const Project = {
       startupDelay: 1, // time until metronome starts
       metronomeSources: [],
       delaySliderVisible: false,
-      retryVisible: false,
+      finalizeVisible: false,
       accuracyCheckVisible: false,
       step: 1,
       videoPreviewDialog: false,
@@ -77,7 +77,7 @@ const Project = {
     startRecording: function() {
       this.uploaded = false;
       this.delaySliderVisible = false;
-      this.retryVisible = false;
+      this.finalizeVisible = false;
       this.accuracyCheckVisible = false;
       this.recordingAborted = false;
       this.stopReference();
@@ -187,6 +187,7 @@ const Project = {
         this.recordedMediaElement.addEventListener('ended', function() {
           console.log("recorded player ended");
           this.playing = false;
+          this.finalizeVisible = true;
         }.bind(this));
         this.playReference(startTime + this.delay/1000, this.referenceGainValue/100);
         this.recordedMediaElement.play();
