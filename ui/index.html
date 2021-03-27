@@ -194,8 +194,8 @@
               </p>
               <h2 class="subtitle-1 mt-2">Wie funktionierts?</h2>
               <p>
-                Jeder nimmt einfach seine Stimme auf. Damit am Ende alles gut zusammen klingt und Rhythmus und Tonhöhe passen, wird parallel zur Aufnahme eine Begleit-Stimme abgespielt.
-                <template v-if="project.ScoreURI">Am besten machst du dir nebenher schon einmal die <a :href="project.ScoreURI">Noten</a> auf oder druckst sie dir aus.</template>
+                Jeder nimmt seine Stimme auf. Damit am Ende alles gut zusammen klingt und Rhythmus und Tonhöhe passen, wird parallel zur Aufnahme eine Begleit-Stimme abgespielt.
+                <template v-if="project.ScoreURI">Am besten machst du dir nebenher die <a :href="project.ScoreURI"><v-btn class="mx-1" x-small>Noten <v-icon right dark>mdi-playlist-music</v-icon></v-btn></a> auf oder druckst sie dir aus.</template>
               </p>
               <template v-if="project.WantVideo">
                 <h2 class="subtitle-1 mt-2">Video</h2>
