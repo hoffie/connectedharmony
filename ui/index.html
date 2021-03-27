@@ -454,18 +454,22 @@
                   löschen und neu aufnehmen
                 </v-btn></div>
 
-                <template v-if="recordedVideoURL.length">
-                  <h2 class="subtitle-1 mt-2">Video ansehen</h2>
-                  <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen.</p>
-                  <ul>
-                    <li>Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein.</li>
-                    <li>Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen.</li>
-                    <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
-                  </ul>
-                  <div class="d-flex justify-center pa-1">
-                    <video :src="recordedVideoURL" controls playsinline :width="videoWidth" />
-                  </div>
-                </template>
+                <v-expansion-panels v-if="recordedVideoURL.length" class="ma-1 mb-10 pr-3">
+                  <v-expansion-panel>
+                  <v-expansion-panel-header>Video ansehen</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen.</p>
+                      <ul>
+                        <li>Achte nicht zu sehr auf die Details &ndash; das Video wird später nur in einem sehr kleinen Format zu sehen sein.</li>
+                        <li>Auch wenn hier nichts angezeigt wird, ist das in Ordnung und du kannst weitermachen.</li>
+                        <li>Anfang und Ende des Videos werden später herausgeschnitten und landen nicht in der fertigen Aufnahme.</li>
+                      </ul>
+                      <div class="d-flex justify-center pa-1">
+                        <video :src="recordedVideoURL" controls playsinline :width="videoWidth" />
+                      </div>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
 
                 <div>
                   <v-btn large color="primary" class="ma-1" @click="step = 4">
