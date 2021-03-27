@@ -386,66 +386,61 @@
                 </template>
               </v-btn>
 
-              <h2 class="subtitle-1 mt-2">Begleit-Lautstärke anpassen</h2>
-              <v-slider v-model="referenceGainValue" prepend-icon="mdi-playlist-music" />
-              <v-alert v-if="referenceGainValue <= 0 && !finalizeVisible" type="info" class="my-2">
-                Die Begleitstimme ist aktuell stummgeschaltet. Spiele deine Aufnahme ab und stelle sicher, das keine Störgeräusche (z.B. Brummen, Straßengeräusche) zu hören sind. Falls du trotzdem die Begleitstimme hörst, ist sie leider auf der Aufnahme gelandet. Stelle in diesem Fall deine Kopfhörer-Lautstärke leiser und nimm erneut auf.
+              <v-alert v-if="playing && referenceGainValue <= 0 && !finalizeVisible" type="info" class="my-2">
+               Du solltest jetzt deine Aufnahme hören. Höre genau hin, ob Störgeräusche (z.B. Brummen, Straßengeräusche) zu hören sind. Falls du jetzt die Begleitstimme hörst, ist sie leider auf der Aufnahme gelandet. Stelle in diesem Fall deine Kopfhörer-Lautstärke leiser und nimm erneut auf.
               </v-alert>
-
-              <v-alert v-if="referenceGainValue > 60" type="warning" class="my-2">
-                Wenn du die Begleitstimme sehr laut drehen musst, um sie gut zu hören, ist vielleicht deine Aufnahme zu laut. Probiere es in diesem Fall etwas weiter weg vom Mikrofon, mit ruhigeren Tönen oder mit einer weniger empfindlichen Mikrofoneinstellung (z.B. am PC: Windows-Mixer).
-              </v-alert>
-
-              <v-card v-if="referenceGainValue > 0" elevation="2" class="mx-1 my-4">
-                <v-card-title>Einsatz anpassen</v-card-title>
-                <v-card-text>
-                  <p>Wenn du hören möchtest, ob du im Tempo geblieben bist, dein Einsatz aber zu früh oder zu spät klingt, kannst du das hier anpassen. Es ist <strong>nicht</strong> notwendig, hier eine exakte Einstellung zu finden.</p>
-                  <p>Drücke die entsprechenden Knöpfe, um <strong>deine Stimme</strong> früher (links) oder später (rechts) einsetzen zu lassen. Das Ergebnis wird dir dann direkt vorgespielt.</p>
-                  <p>Aktuell eingestellte Verschiebung: {{ delay }} Millisekunden</p>
-                  <div>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 500" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="true" /></v-btn>
-                      </template>
-                      <span>Deine Stimme um 0.500 Sekunden früher einsetzen lassen.</span>
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay += 20" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="false" /></v-btn>
-                      </template>
-                      <span>Deine Stimme um 0.020 Sekunden früher einsetzen lassen.</span>
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay -= 20" :disabled="delay < 20 || playing" class="my-1"><delay-arrow direction="right" :fast="false" /></v-btn>
-
-                      </template>
-                      <span>Deine Stimme um 0.020 Sekunden später einsetzen lassen.</span>
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" outlined small color="secondary" @click="delay -= 500" :disabled="delay < 500 || playing" class="my-1"><delay-arrow direction="right" :fast="true" /></v-btn>
-                      </template>
-                      <span>Deine Stimme um 0.500 Sekunden später einsetzen lassen.</span>
-                    </v-tooltip>
-                  </div>
-                </v-card-text>
-              </v-card>
 
               <template v-if="finalizeVisible">
-                <h2 class="subtitle-1 mt-2">Zufrieden?</h2>
-                <p>Bist du zufrieden mit der Qualität? Keine Störgeräusche? Nicht zu laut, nicht zu leise?</p>
-                <p>Wir sind vielleicht nicht alle gewöhnt, unsere eigenen Stimmen aufgenommen zu hören. Deswegen mag Manches ungewohnt klingen. Das ist aber vollkommen okay &ndash; am Ende sind wir alle gemeinsam zu hören.</p>
-
-                <p>Wenn du trotzdem nochmal neu aufnehmen möchtest, kannst du das hier tun:</p>
-                <div><v-btn small text color="secondary" class="ma-1 mb-4" @click="step = 2">
-                  <v-icon small left dark>mdi-delete</v-icon>
-                  löschen und neu aufnehmen
-                </v-btn></div>
-
-                <v-expansion-panels v-if="recordedVideoURL.length" class="ma-1 mb-10 pr-3">
+                <v-expansion-panels class="mx-1 my-4 pr-3" multiple>
                   <v-expansion-panel>
-                  <v-expansion-panel-header>Video ansehen</v-expansion-panel-header>
+                    <v-expansion-panel-header>Optional: Abspiel-Lautstärke anpassen</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <p>Wenn du hören möchtest, ob du im Tempo geblieben bist, kannst die die Begleitstimme hier laut stellen und die Aufnahme erneut abspielen.</p>
+                      <v-slider v-model="referenceGainValue" prepend-icon="mdi-playlist-music" />
+                      <v-alert v-if="referenceGainValue > 60" type="warning" class="my-2">
+                        Wenn du die Begleitstimme sehr laut drehen musst, um sie gut zu hören, ist vielleicht deine Aufnahme zu laut. Probiere es in diesem Fall etwas weiter weg vom Mikrofon, mit ruhigeren Tönen oder mit einer weniger empfindlichen Mikrofoneinstellung (z.B. am PC: Windows-Mixer).
+                      </v-alert>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+
+                  <v-expansion-panel v-if="referenceGainValue > 0" >
+                    <v-expansion-panel-header>Optional: Einsatz anpassen</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <p>Wenn dein Einsatz im Vergleich zur Begleitstimme zu früh oder zu spät klingt, kannst du das hier anpassen. Es ist <strong>nicht</strong> notwendig, hier eine exakte Einstellung zu finden.</p>
+                      <p>Drücke die entsprechenden Knöpfe, um <strong>deine Stimme</strong> früher (links) oder später (rechts) einsetzen zu lassen. Das Ergebnis wird dir dann direkt vorgespielt.</p>
+                      <p>Aktuell eingestellte Verschiebung: {{ delay }} Millisekunden</p>
+                      <div>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn v-on="on" outlined small color="secondary" @click="delay += 500" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="true" /></v-btn>
+                          </template>
+                          <span>Deine Stimme um 0.500 Sekunden früher einsetzen lassen.</span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn v-on="on" outlined small color="secondary" @click="delay += 20" :disabled="delay > 4000 || playing" class="my-1"><delay-arrow direction="left" :fast="false" /></v-btn>
+                          </template>
+                          <span>Deine Stimme um 0.020 Sekunden früher einsetzen lassen.</span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn v-on="on" outlined small color="secondary" @click="delay -= 20" :disabled="delay < 20 || playing" class="my-1"><delay-arrow direction="right" :fast="false" /></v-btn>
+
+                          </template>
+                          <span>Deine Stimme um 0.020 Sekunden später einsetzen lassen.</span>
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <v-btn v-on="on" outlined small color="secondary" @click="delay -= 500" :disabled="delay < 500 || playing" class="my-1"><delay-arrow direction="right" :fast="true" /></v-btn>
+                          </template>
+                          <span>Deine Stimme um 0.500 Sekunden später einsetzen lassen.</span>
+                        </v-tooltip>
+                      </div>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+
+                  <v-expansion-panel v-if="recordedVideoURL.length">
+                    <v-expansion-panel-header>Optional: Video ansehen</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <p>Du hast hier die Möglichkeit, das aufgenommene Video vor dem Speichern anzusehen.</p>
                       <ul>
@@ -458,7 +453,18 @@
                       </div>
                     </v-expansion-panel-content>
                   </v-expansion-panel>
+
                 </v-expansion-panels>
+
+                <h2 class="subtitle-1 mt-2">Zufrieden?</h2>
+                <p>Bist du zufrieden mit der Qualität? Keine Störgeräusche? Nicht zu laut, nicht zu leise?</p>
+                <p>Wir sind vielleicht nicht alle gewöhnt, unsere eigenen Stimmen aufgenommen zu hören. Deswegen mag Manches ungewohnt klingen. Das ist aber vollkommen okay &ndash; am Ende sind wir alle gemeinsam zu hören.</p>
+
+                <p>Wenn du trotzdem nochmal neu aufnehmen möchtest, kannst du das hier tun:</p>
+                <div><v-btn small text color="secondary" class="ma-1 mb-4" @click="step = 2">
+                  <v-icon small left dark>mdi-delete</v-icon>
+                  löschen und neu aufnehmen
+                </v-btn></div>
 
                 <div>
                   <v-btn large color="primary" class="ma-1" @click="step = 4">
