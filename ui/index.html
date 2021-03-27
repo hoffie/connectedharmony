@@ -494,10 +494,10 @@
             <template v-if="!uploaded">
               <p>Du kannst deine Aufnahme jetzt speichern und hochladen, sodass sie in den Gesamtklang eingefügt werden kann.
               </p>
-              <p>Hinweis: Dies wird je nach Internetanbindung einige Sekunden bis Minuten dauern und benötigt einige Megabyte an Datenvolumen.</p>
-              <p>Bitte gib nun noch deinen Namen ein (wenn du das nicht möchtest, kannst du das Feld auch frei lassen).</p>
-              <v-text-field v-model="participantName" label="Dein Name" />
-              <v-text-field v-model="participantComment" label="optionale Nachricht (z.B. &quot;zweite Version&quot; oder &quot;bitte nur Ton aus der ersten Strophe verwenden&quot;)" />
+              <p>Hinweis: Dies wird je nach Internetanbindung einige Minuten dauern und benötigt einige Megabyte an Datenvolumen.</p>
+              <p>Bitte gib nun noch deinen Namen ein.</p>
+              <v-text-field v-model="participantName" label="Dein Name (keine Ziffern oder Ergänzungen)" />
+              <v-text-field v-model="participantComment" label="optionale Nachricht (z.B. &quot;nur Ton verwenden&quot; oder &quot;falscher Ton im ersten Takt&quot;)" />
               <div>
                 <v-btn @click="upload" color="primary" :disabled="uploading" :loading="uploading">
                   Speichern
@@ -509,7 +509,7 @@
             </template>
             <template v-else>
               <v-alert type="success" class="my-2">
-                Fertig &ndash; deine Aufnahme wurde hochgeladen und wird nun eingefügt. Vielen Dank!<br />
+                Fertig &ndash; deine Aufnahme wurde hochgeladen. Vielen Dank!<br />
                 Du kannst die Seite nun schließen.<br />
                 Wenn du willst, kannst du deine Aufnahme noch für dich selbst abspeichern:<br />
                 <v-btn text @click="downloadRecording">Download</v-btn>
