@@ -1,3 +1,5 @@
+- löschen stoppt nicht
+- neuaufnahme schneller nach abspielen
 - clipping detection https://github.com/cwilso/volume-meter/blob/master/volume-meter.js
 - loudness: https://github.com/h5p/h5p-audio-recorder/blob/master/src/components/Recorder.js
 - metrics: number of recordings, number of projects, number of errors
@@ -5,4 +7,3 @@
 - check for empty recording
 - record abort detection
 - start beep
-- conductor video
