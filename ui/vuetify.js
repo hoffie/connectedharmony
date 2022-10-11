@@ -34184,7 +34184,7 @@ function checkIsActive(e, binding) {
   return isActive(e);
 }
 
-function directive(e, el, binding, vnode) {
+function directive(e, el, binding) {
   var handler = typeof binding.value === 'function' ? binding.value : binding.value.handler;
   el._clickOutside.lastMousedownWasOutside && checkEvent(e, el, binding) && setTimeout(function () {
     checkIsActive(e, binding) && handler && handler(e);
@@ -34208,7 +34208,7 @@ var ClickOutside = {
   // clicks on body
   inserted: function inserted(el, binding, vnode) {
     var onClick = function onClick(e) {
-      return directive(e, el, binding, vnode);
+      return directive(e, el, binding);
     };
 
     var onMousedown = function onMousedown(e) {
@@ -35133,7 +35133,7 @@ function () {
 
   Vuetify.install = _install__WEBPACK_IMPORTED_MODULE_0__["install"];
   Vuetify.installed = false;
-  Vuetify.version = "2.6.10";
+  Vuetify.version = "2.6.11";
   Vuetify.config = {
     silent: false
   };
